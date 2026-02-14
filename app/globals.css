@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-cream: #fef6e4;
+    --bg-sky: #d4f1f4;
+    --bg-pink: #fde2e4;
+    --ink-900: #1f2937;
+    --ink-600: #5a6b7a;
+
+    --brand-blue: #1f6feb;
+    --brand-teal: #2a9d8f;
+    --brand-sun: #ffd166;
+    --brand-coral: #f4a261;
+    --brand-berry: #e76f51;
+    --brand-mint: #a8dadc;
+
+    --radius: 20px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    color: var(--ink-900);
+    background:
+      radial-gradient(circle at 10% 10%, #ffffff 0%, transparent 35%),
+      radial-gradient(circle at 90% 0%, #ffe8b5 0%, transparent 35%),
+      radial-gradient(circle at 80% 90%, #cdeffd 0%, transparent 40%),
+      linear-gradient(135deg, var(--bg-cream) 0%, var(--bg-sky) 50%, var(--bg-pink) 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .neon-card {
+    @apply rounded-2xl border border-white/60 bg-white/70 backdrop-blur-sm;
+    box-shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .neon-card:hover {
+    transform: translateY(-4px) rotate(-0.2deg);
+    box-shadow: 0 16px 40px rgba(31, 41, 55, 0.12);
+  }
+
+  .neon-btn {
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 font-semibold;
+    @apply border-2 border-[#1f6feb] text-[#1f6feb] bg-white/80;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 8px 18px rgba(31, 111, 235, 0.15);
+  }
+
+  .neon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(31, 111, 235, 0.2);
+  }
+
+  .neon-btn-primary {
+    @apply neon-btn bg-[#1f6feb] text-white border-[#1f6feb];
+  }
+
+  .gradient-text {
+    font-family: 'Fredoka', sans-serif;
+    background-image: linear-gradient(120deg, #1f6feb 0%, #2a9d8f 50%, #f4a261 100%);
+    @apply bg-clip-text text-transparent;
+  }
+
+  .input-neon {
+    @apply w-full rounded-xl border border-white/70 bg-white/80 px-4 py-3 text-[#1f2937];
+    @apply placeholder-[#9aa6b2] focus:outline-none;
+    box-shadow: inset 0 2px 6px rgba(31, 41, 55, 0.08);
+  }
+
+  .timer-display {
+    font-family: 'Fredoka', sans-serif;
+    @apply text-4xl font-bold text-[#1f6feb];
+  }
+
+  .timer-display.warning {
+    @apply text-[#f4a261];
+  }
+
+  .timer-display.critical {
+    @apply text-[#e76f51];
+  }
+
+  .pill {
+    @apply rounded-full bg-white/80 px-4 py-2 text-xs font-semibold text-[#5a6b7a];
+    border: 1px solid rgba(255, 209, 102, 0.6);
+  }
+
+  .badge {
+    @apply rounded-full bg-[#ffd166] px-3 py-1 text-xs font-bold text-[#6b4f2a];
+  }
+
+  .stat-card {
+    @apply rounded-xl bg-white/80 p-4 text-center;
+    border: 1px dashed rgba(31, 111, 235, 0.4);
+  }
+
+  .stat-title {
+    @apply text-xs text-[#5a6b7a];
+  }
+
+  .stat-value {
+    @apply text-xl font-bold text-[#1f2937];
+  }
+
+  .feature-card {
+    @apply rounded-2xl bg-white/80 p-6;
+    box-shadow: 0 12px 24px rgba(31, 41, 55, 0.08);
+  }
+
+  .feature-emoji {
+    @apply text-3xl mb-3;
+  }
+
+  .feature-title {
+    font-family: 'Fredoka', sans-serif;
+    @apply text-xl mb-2 text-[#1f2937];
+  }
+
+  .feature-text {
+    @apply text-[#5a6b7a];
+  }
+}
+
+@layer utilities {
+  @keyframes float-up {
+    0% {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes countdown-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(0.8);
+      opacity: 0.2;
+    }
+  }
+
+  .animate-float-up {
+    animation: float-up 0.6s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slide-in 0.5s ease-out;
+  }
+
+  .animate-countdown {
+    animation: countdown-pulse 1s ease-out forwards;
+  }
+}

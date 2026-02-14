@@ -1,0 +1,952 @@
+{
+  "rooms": {
+    "room-mlmcre1l-xc11py": {
+      "id": "room-mlmcre1l-xc11py",
+      "code": "WUQC56",
+      "mode": "country-rush",
+      "pool": {
+        "kind": "world"
+      },
+      "seriesId": "series-mlmcre1l-7xke362u",
+      "seriesBestOf": 3,
+      "seriesMatchNumber": 1,
+      "rounds": 12,
+      "durationSeconds": 180,
+      "hostPlayerId": "player-9s4q0y6k",
+      "status": "waiting",
+      "players": [
+        {
+          "playerId": "player-9s4q0y6k",
+          "name": "Keshav",
+          "joinedAt": "2026-02-14T13:28:48.345Z",
+          "ready": false,
+          "score": 0,
+          "answers": {}
+        }
+      ],
+      "questions": [
+        {
+          "idx": 0,
+          "prompt": "San José",
+          "answer": "Costa Rica",
+          "country": "Costa Rica",
+          "capital": "San José"
+        },
+        {
+          "idx": 1,
+          "prompt": "Pristina",
+          "answer": "Kosovo",
+          "country": "Kosovo",
+          "capital": "Pristina"
+        },
+        {
+          "idx": 2,
+          "prompt": "Panama City",
+          "answer": "Panama",
+          "country": "Panama",
+          "capital": "Panama City"
+        },
+        {
+          "idx": 3,
+          "prompt": "Kuala Lumpur",
+          "answer": "Malaysia",
+          "country": "Malaysia",
+          "capital": "Kuala Lumpur"
+        },
+        {
+          "idx": 4,
+          "prompt": "Mogadishu",
+          "answer": "Somalia",
+          "country": "Somalia",
+          "capital": "Mogadishu"
+        },
+        {
+          "idx": 5,
+          "prompt": "Sarajevo",
+          "answer": "Bosnia and Herzegovina",
+          "country": "Bosnia and Herzegovina",
+          "capital": "Sarajevo"
+        },
+        {
+          "idx": 6,
+          "prompt": "Tallinn",
+          "answer": "Estonia",
+          "country": "Estonia",
+          "capital": "Tallinn"
+        },
+        {
+          "idx": 7,
+          "prompt": "Tripoli",
+          "answer": "Libya",
+          "country": "Libya",
+          "capital": "Tripoli"
+        },
+        {
+          "idx": 8,
+          "prompt": "Dakar",
+          "answer": "Senegal",
+          "country": "Senegal",
+          "capital": "Dakar"
+        },
+        {
+          "idx": 9,
+          "prompt": "Riga",
+          "answer": "Latvia",
+          "country": "Latvia",
+          "capital": "Riga"
+        },
+        {
+          "idx": 10,
+          "prompt": "Ngerulmud",
+          "answer": "Palau",
+          "country": "Palau",
+          "capital": "Ngerulmud"
+        },
+        {
+          "idx": 11,
+          "prompt": "Lisbon",
+          "answer": "Portugal",
+          "country": "Portugal",
+          "capital": "Lisbon"
+        }
+      ],
+      "createdAt": "2026-02-14T13:28:48.346Z"
+    },
+    "room-mlmctfhw-6e6qfy": {
+      "id": "room-mlmctfhw-6e6qfy",
+      "code": "FEYSV8",
+      "mode": "country-rush",
+      "pool": {
+        "kind": "continent",
+        "continent": "Oceania",
+        "countries": [
+          "Australia",
+          "Fiji",
+          "Kiribati",
+          "Marshall Islands",
+          "Micronesia",
+          "Nauru",
+          "New Zealand",
+          "Palau",
+          "Papua New Guinea",
+          "Samoa",
+          "Solomon Islands",
+          "Tonga",
+          "Tuvalu",
+          "Vanuatu"
+        ]
+      },
+      "seriesId": "series-mlmctfhw-owu5twx5",
+      "seriesBestOf": 3,
+      "seriesMatchNumber": 1,
+      "rounds": 12,
+      "durationSeconds": 180,
+      "hostPlayerId": "player-9s4q0y6k",
+      "status": "finished",
+      "players": [
+        {
+          "playerId": "player-9s4q0y6k",
+          "name": "Keshav",
+          "joinedAt": "2026-02-14T13:30:23.540Z",
+          "ready": true,
+          "score": 200,
+          "answers": {
+            "0": {
+              "answer": "Vanuatu",
+              "correct": true,
+              "submittedAt": "2026-02-14T15:15:59.167Z"
+            },
+            "1": {
+              "answer": "samoa",
+              "correct": true,
+              "submittedAt": "2026-02-14T15:16:09.197Z"
+            }
+          }
+        },
+        {
+          "playerId": "duel-tab-eelx6xq232",
+          "name": "Guest Q232",
+          "joinedAt": "2026-02-14T15:15:19.857Z",
+          "ready": true,
+          "score": 300,
+          "answers": {
+            "0": {
+              "answer": "Vanuatu",
+              "correct": true,
+              "submittedAt": "2026-02-14T15:16:19.107Z"
+            },
+            "1": {
+              "answer": "Samoa",
+              "correct": true,
+              "submittedAt": "2026-02-14T15:16:22.819Z"
+            },
+            "2": {
+              "answer": "yegfwu",
+              "correct": false,
+              "submittedAt": "2026-02-14T15:16:26.480Z"
+            },
+            "3": {
+              "answer": "fwejhbe",
+              "correct": false,
+              "submittedAt": "2026-02-14T15:16:28.544Z"
+            },
+            "4": {
+              "answer": "fe",
+              "correct": false,
+              "submittedAt": "2026-02-14T15:16:30.219Z"
+            },
+            "5": {
+              "answer": "papua new guinea",
+              "correct": true,
+              "submittedAt": "2026-02-14T15:16:41.989Z"
+            }
+          }
+        }
+      ],
+      "questions": [
+        {
+          "idx": 0,
+          "prompt": "Port Vila",
+          "answer": "Vanuatu",
+          "country": "Vanuatu",
+          "capital": "Port Vila"
+        },
+        {
+          "idx": 1,
+          "prompt": "Apia",
+          "answer": "Samoa",
+          "country": "Samoa",
+          "capital": "Apia"
+        },
+        {
+          "idx": 2,
+          "prompt": "Majuro",
+          "answer": "Marshall Islands",
+          "country": "Marshall Islands",
+          "capital": "Majuro"
+        },
+        {
+          "idx": 3,
+          "prompt": "Ngerulmud",
+          "answer": "Palau",
+          "country": "Palau",
+          "capital": "Ngerulmud"
+        },
+        {
+          "idx": 4,
+          "prompt": "Wellington",
+          "answer": "New Zealand",
+          "country": "New Zealand",
+          "capital": "Wellington"
+        },
+        {
+          "idx": 5,
+          "prompt": "Port Moresby",
+          "answer": "Papua New Guinea",
+          "country": "Papua New Guinea",
+          "capital": "Port Moresby"
+        },
+        {
+          "idx": 6,
+          "prompt": "Funafuti",
+          "answer": "Tuvalu",
+          "country": "Tuvalu",
+          "capital": "Funafuti"
+        },
+        {
+          "idx": 7,
+          "prompt": "Honiara",
+          "answer": "Solomon Islands",
+          "country": "Solomon Islands",
+          "capital": "Honiara"
+        },
+        {
+          "idx": 8,
+          "prompt": "Yaren",
+          "answer": "Nauru",
+          "country": "Nauru",
+          "capital": "Yaren"
+        },
+        {
+          "idx": 9,
+          "prompt": "Suva",
+          "answer": "Fiji",
+          "country": "Fiji",
+          "capital": "Suva"
+        },
+        {
+          "idx": 10,
+          "prompt": "Nuku'alofa",
+          "answer": "Tonga",
+          "country": "Tonga",
+          "capital": "Nuku'alofa"
+        },
+        {
+          "idx": 11,
+          "prompt": "Tarawa",
+          "answer": "Kiribati",
+          "country": "Kiribati",
+          "capital": "Tarawa"
+        }
+      ],
+      "createdAt": "2026-02-14T13:30:23.541Z",
+      "startedAt": "2026-02-14T15:15:22.982Z",
+      "endedAt": "2026-02-14T15:18:23.993Z"
+    },
+    "room-mlmhy41q-rpzzfq": {
+      "id": "room-mlmhy41q-rpzzfq",
+      "code": "LRE9W4",
+      "mode": "continent-quiz",
+      "pool": {
+        "kind": "world"
+      },
+      "seriesId": "series-mlmhy41q-d75ldloi",
+      "seriesBestOf": 3,
+      "seriesMatchNumber": 1,
+      "rounds": 20,
+      "durationSeconds": 240,
+      "hostPlayerId": "player-9s4q0y6k",
+      "status": "active",
+      "players": [
+        {
+          "playerId": "player-9s4q0y6k",
+          "name": "Keshav",
+          "joinedAt": "2026-02-14T15:54:00.062Z",
+          "ready": true,
+          "score": 200,
+          "answers": {
+            "0": {
+              "answer": "us",
+              "correct": false,
+              "submittedAt": "2026-02-14T15:54:31.783Z"
+            },
+            "1": {
+              "answer": "colombia",
+              "correct": true,
+              "submittedAt": "2026-02-14T15:54:44.351Z"
+            },
+            "2": {
+              "answer": "andorra",
+              "correct": true,
+              "submittedAt": "2026-02-14T15:54:50.279Z"
+            }
+          }
+        },
+        {
+          "playerId": "duel-tab-5uka2jimj3",
+          "name": "Guest IMJ3",
+          "joinedAt": "2026-02-14T15:54:06.547Z",
+          "ready": true,
+          "score": 0,
+          "answers": {}
+        }
+      ],
+      "questions": [
+        {
+          "idx": 0,
+          "prompt": "Kyiv",
+          "answer": "Ukraine",
+          "country": "Ukraine",
+          "capital": "Kyiv"
+        },
+        {
+          "idx": 1,
+          "prompt": "Bogotá",
+          "answer": "Colombia",
+          "country": "Colombia",
+          "capital": "Bogotá"
+        },
+        {
+          "idx": 2,
+          "prompt": "Andorra la Vella",
+          "answer": "Andorra",
+          "country": "Andorra",
+          "capital": "Andorra la Vella"
+        },
+        {
+          "idx": 3,
+          "prompt": "Harare",
+          "answer": "Zimbabwe",
+          "country": "Zimbabwe",
+          "capital": "Harare"
+        },
+        {
+          "idx": 4,
+          "prompt": "Basseterre",
+          "answer": "Saint Kitts and Nevis",
+          "country": "Saint Kitts and Nevis",
+          "capital": "Basseterre"
+        },
+        {
+          "idx": 5,
+          "prompt": "Ramallah",
+          "answer": "Palestine",
+          "country": "Palestine",
+          "capital": "Ramallah"
+        },
+        {
+          "idx": 6,
+          "prompt": "Moscow",
+          "answer": "Russia",
+          "country": "Russia",
+          "capital": "Moscow"
+        },
+        {
+          "idx": 7,
+          "prompt": "Conakry",
+          "answer": "Guinea",
+          "country": "Guinea",
+          "capital": "Conakry"
+        },
+        {
+          "idx": 8,
+          "prompt": "Mbabane",
+          "answer": "Swaziland",
+          "country": "Swaziland",
+          "capital": "Mbabane"
+        },
+        {
+          "idx": 9,
+          "prompt": "Brazzaville",
+          "answer": "Republic of the Congo",
+          "country": "Republic of the Congo",
+          "capital": "Brazzaville"
+        },
+        {
+          "idx": 10,
+          "prompt": "Yamoussoukro",
+          "answer": "Côte d'Ivoire",
+          "country": "Côte d'Ivoire",
+          "capital": "Yamoussoukro"
+        },
+        {
+          "idx": 11,
+          "prompt": "Port Moresby",
+          "answer": "Papua New Guinea",
+          "country": "Papua New Guinea",
+          "capital": "Port Moresby"
+        },
+        {
+          "idx": 12,
+          "prompt": "Podgorica",
+          "answer": "Montenegro",
+          "country": "Montenegro",
+          "capital": "Podgorica"
+        },
+        {
+          "idx": 13,
+          "prompt": "Kabul",
+          "answer": "Afghanistan",
+          "country": "Afghanistan",
+          "capital": "Kabul"
+        },
+        {
+          "idx": 14,
+          "prompt": "Colombo",
+          "answer": "Sri Lanka",
+          "country": "Sri Lanka",
+          "capital": "Colombo"
+        },
+        {
+          "idx": 15,
+          "prompt": "Bridgetown",
+          "answer": "Barbados",
+          "country": "Barbados",
+          "capital": "Bridgetown"
+        },
+        {
+          "idx": 16,
+          "prompt": "Beijing",
+          "answer": "China",
+          "country": "China",
+          "capital": "Beijing"
+        },
+        {
+          "idx": 17,
+          "prompt": "Beirut",
+          "answer": "Lebanon",
+          "country": "Lebanon",
+          "capital": "Beirut"
+        },
+        {
+          "idx": 18,
+          "prompt": "Santiago",
+          "answer": "Chile",
+          "country": "Chile",
+          "capital": "Santiago"
+        },
+        {
+          "idx": 19,
+          "prompt": "Juba",
+          "answer": "South Sudan",
+          "country": "South Sudan",
+          "capital": "Juba"
+        }
+      ],
+      "createdAt": "2026-02-14T15:54:00.062Z",
+      "startedAt": "2026-02-14T15:54:22.163Z"
+    },
+    "room-mlmhzd95-ljlj36": {
+      "id": "room-mlmhzd95-ljlj36",
+      "code": "ZRH4BY",
+      "mode": "world-quiz",
+      "pool": {
+        "kind": "world"
+      },
+      "seriesId": "series-mlmhzd95-bv2p2cnm",
+      "seriesBestOf": 3,
+      "seriesMatchNumber": 1,
+      "rounds": 25,
+      "durationSeconds": 300,
+      "hostPlayerId": "player-9s4q0y6k",
+      "status": "active",
+      "players": [
+        {
+          "playerId": "player-9s4q0y6k",
+          "name": "Keshav",
+          "joinedAt": "2026-02-14T15:54:58.649Z",
+          "ready": true,
+          "score": 0,
+          "answers": {}
+        },
+        {
+          "playerId": "duel-tab-5uka2jimj3",
+          "name": "Guest IMJ3",
+          "joinedAt": "2026-02-14T15:55:03.540Z",
+          "ready": true,
+          "score": 0,
+          "answers": {}
+        }
+      ],
+      "questions": [
+        {
+          "idx": 0,
+          "prompt": "Maseru",
+          "answer": "Lesotho",
+          "country": "Lesotho",
+          "capital": "Maseru"
+        },
+        {
+          "idx": 1,
+          "prompt": "Paris",
+          "answer": "France",
+          "country": "France",
+          "capital": "Paris"
+        },
+        {
+          "idx": 2,
+          "prompt": "La Paz",
+          "answer": "Bolivia",
+          "country": "Bolivia",
+          "capital": "La Paz"
+        },
+        {
+          "idx": 3,
+          "prompt": "Helsinki",
+          "answer": "Finland",
+          "country": "Finland",
+          "capital": "Helsinki"
+        },
+        {
+          "idx": 4,
+          "prompt": "Banjul",
+          "answer": "Gambia",
+          "country": "Gambia",
+          "capital": "Banjul"
+        },
+        {
+          "idx": 5,
+          "prompt": "Tegucigalpa",
+          "answer": "Honduras",
+          "country": "Honduras",
+          "capital": "Tegucigalpa"
+        },
+        {
+          "idx": 6,
+          "prompt": "Caracas",
+          "answer": "Venezuela",
+          "country": "Venezuela",
+          "capital": "Caracas"
+        },
+        {
+          "idx": 7,
+          "prompt": "Tallinn",
+          "answer": "Estonia",
+          "country": "Estonia",
+          "capital": "Tallinn"
+        },
+        {
+          "idx": 8,
+          "prompt": "Warsaw",
+          "answer": "Poland",
+          "country": "Poland",
+          "capital": "Warsaw"
+        },
+        {
+          "idx": 9,
+          "prompt": "Minsk",
+          "answer": "Belarus",
+          "country": "Belarus",
+          "capital": "Minsk"
+        },
+        {
+          "idx": 10,
+          "prompt": "Khartoum",
+          "answer": "Sudan",
+          "country": "Sudan",
+          "capital": "Khartoum"
+        },
+        {
+          "idx": 11,
+          "prompt": "Asmara",
+          "answer": "Eritrea",
+          "country": "Eritrea",
+          "capital": "Asmara"
+        },
+        {
+          "idx": 12,
+          "prompt": "Pyongyang",
+          "answer": "North Korea",
+          "country": "North Korea",
+          "capital": "Pyongyang"
+        },
+        {
+          "idx": 13,
+          "prompt": "Rabat",
+          "answer": "Morocco",
+          "country": "Morocco",
+          "capital": "Rabat"
+        },
+        {
+          "idx": 14,
+          "prompt": "Dar es Salaam",
+          "answer": "Tanzania",
+          "country": "Tanzania",
+          "capital": "Dar es Salaam"
+        },
+        {
+          "idx": 15,
+          "prompt": "Podgorica",
+          "answer": "Montenegro",
+          "country": "Montenegro",
+          "capital": "Podgorica"
+        },
+        {
+          "idx": 16,
+          "prompt": "Lusaka",
+          "answer": "Zambia",
+          "country": "Zambia",
+          "capital": "Lusaka"
+        },
+        {
+          "idx": 17,
+          "prompt": "Oslo",
+          "answer": "Norway",
+          "country": "Norway",
+          "capital": "Oslo"
+        },
+        {
+          "idx": 18,
+          "prompt": "Thimphu",
+          "answer": "Bhutan",
+          "country": "Bhutan",
+          "capital": "Thimphu"
+        },
+        {
+          "idx": 19,
+          "prompt": "Malé",
+          "answer": "Maldives",
+          "country": "Maldives",
+          "capital": "Malé"
+        },
+        {
+          "idx": 20,
+          "prompt": "Gitega",
+          "answer": "Burundi",
+          "country": "Burundi",
+          "capital": "Gitega"
+        },
+        {
+          "idx": 21,
+          "prompt": "Ashgabat",
+          "answer": "Turkmenistan",
+          "country": "Turkmenistan",
+          "capital": "Ashgabat"
+        },
+        {
+          "idx": 22,
+          "prompt": "Bangkok",
+          "answer": "Thailand",
+          "country": "Thailand",
+          "capital": "Bangkok"
+        },
+        {
+          "idx": 23,
+          "prompt": "Doha",
+          "answer": "Qatar",
+          "country": "Qatar",
+          "capital": "Doha"
+        },
+        {
+          "idx": 24,
+          "prompt": "Mbabane",
+          "answer": "Swaziland",
+          "country": "Swaziland",
+          "capital": "Mbabane"
+        }
+      ],
+      "createdAt": "2026-02-14T15:54:58.649Z",
+      "startedAt": "2026-02-14T15:55:10.149Z"
+    },
+    "room-mlmi15ay-yfn59l": {
+      "id": "room-mlmi15ay-yfn59l",
+      "code": "MPTC8Z",
+      "mode": "continent-quiz",
+      "pool": {
+        "kind": "world"
+      },
+      "seriesId": "series-mlmi15ay-os7509dg",
+      "seriesBestOf": 3,
+      "seriesMatchNumber": 1,
+      "rounds": 20,
+      "durationSeconds": 240,
+      "hostPlayerId": "player-9s4q0y6k",
+      "status": "active",
+      "players": [
+        {
+          "playerId": "player-9s4q0y6k",
+          "name": "Keshav",
+          "joinedAt": "2026-02-14T15:56:21.658Z",
+          "ready": true,
+          "score": 0,
+          "answers": {}
+        },
+        {
+          "playerId": "duel-tab-z9i25k7bvv",
+          "name": "Guest 7BVV",
+          "joinedAt": "2026-02-14T15:56:26.709Z",
+          "ready": true,
+          "score": 0,
+          "answers": {}
+        }
+      ],
+      "questions": [
+        {
+          "idx": 0,
+          "prompt": "Porto-Novo",
+          "answer": "Benin",
+          "country": "Benin",
+          "capital": "Porto-Novo"
+        },
+        {
+          "idx": 1,
+          "prompt": "Kabul",
+          "answer": "Afghanistan",
+          "country": "Afghanistan",
+          "capital": "Kabul"
+        },
+        {
+          "idx": 2,
+          "prompt": "Zagreb",
+          "answer": "Croatia",
+          "country": "Croatia",
+          "capital": "Zagreb"
+        },
+        {
+          "idx": 3,
+          "prompt": "Wellington",
+          "answer": "New Zealand",
+          "country": "New Zealand",
+          "capital": "Wellington"
+        },
+        {
+          "idx": 4,
+          "prompt": "Seoul",
+          "answer": "South Korea",
+          "country": "South Korea",
+          "capital": "Seoul"
+        },
+        {
+          "idx": 5,
+          "prompt": "Dakar",
+          "answer": "Senegal",
+          "country": "Senegal",
+          "capital": "Dakar"
+        },
+        {
+          "idx": 6,
+          "prompt": "Bissau",
+          "answer": "Guinea-Bissau",
+          "country": "Guinea-Bissau",
+          "capital": "Bissau"
+        },
+        {
+          "idx": 7,
+          "prompt": "Bogotá",
+          "answer": "Colombia",
+          "country": "Colombia",
+          "capital": "Bogotá"
+        },
+        {
+          "idx": 8,
+          "prompt": "Guatemala City",
+          "answer": "Guatemala",
+          "country": "Guatemala",
+          "capital": "Guatemala City"
+        },
+        {
+          "idx": 9,
+          "prompt": "Phnom Penh",
+          "answer": "Cambodia",
+          "country": "Cambodia",
+          "capital": "Phnom Penh"
+        },
+        {
+          "idx": 10,
+          "prompt": "Ashgabat",
+          "answer": "Turkmenistan",
+          "country": "Turkmenistan",
+          "capital": "Ashgabat"
+        },
+        {
+          "idx": 11,
+          "prompt": "Copenhagen",
+          "answer": "Denmark",
+          "country": "Denmark",
+          "capital": "Copenhagen"
+        },
+        {
+          "idx": 12,
+          "prompt": "Port Louis",
+          "answer": "Mauritius",
+          "country": "Mauritius",
+          "capital": "Port Louis"
+        },
+        {
+          "idx": 13,
+          "prompt": "Brazzaville",
+          "answer": "Republic of the Congo",
+          "country": "Republic of the Congo",
+          "capital": "Brazzaville"
+        },
+        {
+          "idx": 14,
+          "prompt": "Pristina",
+          "answer": "Kosovo",
+          "country": "Kosovo",
+          "capital": "Pristina"
+        },
+        {
+          "idx": 15,
+          "prompt": "Andorra la Vella",
+          "answer": "Andorra",
+          "country": "Andorra",
+          "capital": "Andorra la Vella"
+        },
+        {
+          "idx": 16,
+          "prompt": "Caracas",
+          "answer": "Venezuela",
+          "country": "Venezuela",
+          "capital": "Caracas"
+        },
+        {
+          "idx": 17,
+          "prompt": "Antananarivo",
+          "answer": "Madagascar",
+          "country": "Madagascar",
+          "capital": "Antananarivo"
+        },
+        {
+          "idx": 18,
+          "prompt": "Yamoussoukro",
+          "answer": "Côte d'Ivoire",
+          "country": "Côte d'Ivoire",
+          "capital": "Yamoussoukro"
+        },
+        {
+          "idx": 19,
+          "prompt": "Lisbon",
+          "answer": "Portugal",
+          "country": "Portugal",
+          "capital": "Lisbon"
+        }
+      ],
+      "createdAt": "2026-02-14T15:56:21.658Z",
+      "startedAt": "2026-02-14T15:56:30.311Z"
+    },
+    "room-mlmidj2l-pjmuja": {
+      "id": "room-mlmidj2l-pjmuja",
+      "code": "FZ672Q",
+      "mode": "continent-quiz",
+      "pool": {
+        "kind": "world"
+      },
+      "seriesId": "series-mlmidj2l-ahms4f68",
+      "seriesBestOf": 3,
+      "seriesMatchNumber": 1,
+      "rounds": 14,
+      "durationSeconds": 300,
+      "hostPlayerId": "player-9s4q0y6k",
+      "status": "finished",
+      "players": [
+        {
+          "playerId": "player-9s4q0y6k",
+          "name": "Keshav",
+          "joinedAt": "2026-02-14T16:05:59.373Z",
+          "ready": true,
+          "score": 172,
+          "answers": {},
+          "guessedCountries": [
+            "New Zealand",
+            "Australia",
+            "Kiribati",
+            "Papua New Guinea",
+            "Micronesia",
+            "Palau",
+            "Fiji",
+            "Tonga",
+            "Samoa",
+            "Marshall Islands",
+            "Solomon Islands",
+            "Tuvalu",
+            "Nauru",
+            "Vanuatu"
+          ]
+        },
+        {
+          "playerId": "duel-tab-jrh9errye9",
+          "name": "Guest RYE9",
+          "joinedAt": "2026-02-14T16:06:04.841Z",
+          "ready": true,
+          "score": 42,
+          "answers": {},
+          "guessedCountries": [
+            "Vanuatu"
+          ]
+        }
+      ],
+      "questions": [],
+      "targetCountries": [
+        "Australia",
+        "Fiji",
+        "Kiribati",
+        "Marshall Islands",
+        "Micronesia",
+        "Nauru",
+        "New Zealand",
+        "Palau",
+        "Papua New Guinea",
+        "Samoa",
+        "Solomon Islands",
+        "Tonga",
+        "Tuvalu",
+        "Vanuatu"
+      ],
+      "createdAt": "2026-02-14T16:05:59.373Z",
+      "focusRegion": "Oceania",
+      "startedAt": "2026-02-14T16:06:14.862Z",
+      "endedAt": "2026-02-14T16:08:00.957Z"
+    }
+  }
+}
