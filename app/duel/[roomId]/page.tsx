@@ -123,8 +123,9 @@ export default function DuelRoomPage() {
   const [flash, setFlash] = useState<string | null>(null);
 
   const { playerId, playerName } = useMemo(() => getOrCreatePlayerIdentity(), []);
-  const [tabPlayerId, setTabPlayerId] = useState(playerId);
-  const [tabPlayerName, setTabPlayerName] = useState(playerName);
+  const [tabPlayerId, setTabPlayerId] = useState('');
+  const [tabPlayerName, setTabPlayerName] = useState('');
+  const [identityReady, setIdentityReady] = useState(false);
 
   useEffect(() => {
     const localLookup = buildCountryLookup(COUNTRY_NAMES);
@@ -166,25 +167,31 @@ export default function DuelRoomPage() {
   }, []);
 
   useEffect(() => {
+    if (!roomId) return;
     if (isSpectator || !isInviteJoin) {
       setTabPlayerId(playerId);
       setTabPlayerName(playerName);
+      setIdentityReady(true);
       return;
     }
-    const existingId = window.sessionStorage.getItem('georush_duel_tab_player_id');
-    const existingName = window.sessionStorage.getItem('georush_duel_tab_player_name');
+    const idKey = `georush_duel_tab_player_id_${roomId}`;
+    const nameKey = `georush_duel_tab_player_name_${roomId}`;
+    const existingId = window.sessionStorage.getItem(idKey);
+    const existingName = window.sessionStorage.getItem(nameKey);
     if (existingId && existingName) {
       setTabPlayerId(existingId);
       setTabPlayerName(existingName);
+      setIdentityReady(true);
       return;
     }
     const id = `duel-tab-${randomToken(10)}`;
     const name = `Guest ${id.slice(-4).toUpperCase()}`;
-    window.sessionStorage.setItem('georush_duel_tab_player_id', id);
-    window.sessionStorage.setItem('georush_duel_tab_player_name', name);
+    window.sessionStorage.setItem(idKey, id);
+    window.sessionStorage.setItem(nameKey, name);
     setTabPlayerId(id);
     setTabPlayerName(name);
-  }, [isInviteJoin, isSpectator, playerId, playerName]);
+    setIdentityReady(true);
+  }, [isInviteJoin, isSpectator, playerId, playerName, roomId]);
 
   const viewerPlayerId = useMemo(() => (isSpectator ? `spectator-${tabPlayerId}` : tabPlayerId), [isSpectator, tabPlayerId]);
 
@@ -198,6 +205,7 @@ export default function DuelRoomPage() {
   };
 
   useEffect(() => {
+    if (!identityReady) return;
     if (!roomId) {
       setJoining(false);
       setError('Invalid room');
@@ -231,7 +239,7 @@ export default function DuelRoomPage() {
     return () => {
       mounted = false;
     };
-  }, [roomId, tabPlayerId, tabPlayerName, isSpectator]);
+  }, [roomId, tabPlayerId, tabPlayerName, isSpectator, identityReady]);
 
   useEffect(() => {
     if (!room) return;

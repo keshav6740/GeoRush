@@ -244,7 +244,7 @@ export function SporcleCountryQuiz({
   }
 
   return (
-    <main className={`${emphasizeMap ? 'h-screen overflow-hidden' : 'min-h-screen'} px-4 py-3 md:py-4`}>
+    <main className={`${emphasizeMap ? 'min-h-screen md:h-screen md:overflow-hidden' : 'min-h-screen'} px-4 py-3 md:py-4`}>
       <div className={`max-w-7xl mx-auto ${emphasizeMap ? 'h-full space-y-3' : 'grid grid-cols-1 xl:grid-cols-2 gap-6 items-start'}`}>
         {emphasizeMap && (
           <div className="neon-card p-4">
@@ -290,7 +290,7 @@ export function SporcleCountryQuiz({
             guessedCountries={guessedCountries}
             focusCountries={targetList}
             focusRegion={focusRegion}
-            mapHeightClass={mapHeightClass ?? 'h-[calc(100vh-180px)] md:h-[calc(100vh-190px)]'}
+            mapHeightClass={mapHeightClass ?? 'h-[52vh] md:h-[calc(100vh-190px)]'}
             title="Live Fill Map"
           />
         )}
