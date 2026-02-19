@@ -18,6 +18,9 @@ export interface ScoreComputationInput {
 const MODE_LABEL_TO_KEY: Record<string, ModeKey> = {
   'Speed Run': 'speed-run',
   'Neighbour Chain': 'neighbour-chain',
+  'Border Rush': 'neighbour-chain',
+  'Travel Chain Daily': 'neighbour-chain',
+  'Travel Chain Practice': 'neighbour-chain',
   'Country to Capital': 'country-capital',
   'Daily Challenge': 'daily-challenge',
   'Continent Quiz': 'continent-quiz',

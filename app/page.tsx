@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Compass, Globe2, Mountain, Route, Sparkles, UserRound } from 'lucide-react';
+import { Compass, Globe2, Mountain, Sparkles, UserRound } from 'lucide-react';
 import { getAuthSession, getOrCreatePlayerIdentity } from '@/lib/playerId';
 
 interface HomeStats {
@@ -20,12 +20,22 @@ const QUICK_CHALLENGES = [
   { country: 'Australia', capital: 'Canberra', hint: 'Country and continent' },
 ];
 
+function shuffleChallenges() {
+  const shuffled = [...QUICK_CHALLENGES];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export default function Page() {
   const [stats, setStats] = useState<HomeStats>({
     players: 0,
     topScore: 0,
     userRank: null,
   });
+  const [shuffledChallenges, setShuffledChallenges] = useState(() => shuffleChallenges());
   const [challengeIndex, setChallengeIndex] = useState(0);
   const [guess, setGuess] = useState('');
   const [feedback, setFeedback] = useState<string>('');
@@ -47,7 +57,7 @@ export default function Page() {
       .catch(() => undefined);
   }, []);
 
-  const activeChallenge = QUICK_CHALLENGES[challengeIndex];
+  const activeChallenge = shuffledChallenges[challengeIndex];
 
   const handleCheck = () => {
     const normalizedGuess = guess.trim().toLowerCase();
@@ -64,7 +74,14 @@ export default function Page() {
   };
 
   const handleNextChallenge = () => {
-    setChallengeIndex((prev) => (prev + 1) % QUICK_CHALLENGES.length);
+    setChallengeIndex((prev) => {
+      const nextIndex = prev + 1;
+      if (nextIndex >= shuffledChallenges.length) {
+        setShuffledChallenges(shuffleChallenges());
+        return 0;
+      }
+      return nextIndex;
+    });
     setGuess('');
     setFeedback('');
   };
@@ -85,7 +102,7 @@ export default function Page() {
               <Sparkles size={14} />
               Geography Arcade
             </div>
-            <h1 className="mt-3 text-5xl md:text-7xl font-extrabold leading-[0.9] tracking-tight bg-gradient-to-r from-[#0f5bd8] via-[#17a06f] to-[#f18a3d] bg-clip-text text-transparent">
+            <h1 className="mt-3 text-4xl sm:text-5xl md:text-7xl font-extrabold leading-[0.9] tracking-tight bg-gradient-to-r from-[#0f5bd8] via-[#17a06f] to-[#f18a3d] bg-clip-text text-transparent">
               GeoRush
             </h1>
           </div>
@@ -102,7 +119,7 @@ export default function Page() {
         <section className="grid grid-cols-1 xl:grid-cols-[1.05fr_0.95fr] gap-6 items-stretch">
           <div className="rounded-[1.5rem] border border-[#d4deea] bg-white/75 backdrop-blur-sm p-7 md:p-8 shadow-[0_16px_50px_rgba(24,66,130,0.10)]">
             <div className="space-y-6">
-              <p className="text-2xl md:text-4xl font-bold text-[#1d2a3a] leading-tight">
+              <p className="text-xl sm:text-2xl md:text-4xl font-bold text-[#1d2a3a] leading-tight">
                 Turn map knowledge into reflex.
                 <br />
                 Fast rounds. Real ranks. Daily streaks.
@@ -111,17 +128,28 @@ export default function Page() {
                 GeoRush is built like a game show for geography. Jump in instantly, pick your mode, and chase cleaner runs every day.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                <Link href="/signin" className="neon-btn-primary text-center py-3.5 text-base font-semibold">
-                  Sign In / Sign Up
-                </Link>
-                <Link href="/modes" className="neon-btn text-center py-3.5 text-base font-semibold">
-                  Continue as Guest
-                </Link>
-                <Link href={isAuthenticated ? '/profile' : '/signin'} className="neon-btn text-center py-3.5 text-base font-semibold">
-                  {isAuthenticated ? 'Open Profile' : 'Open Account'}
-                </Link>
-              </div>
+              {isAuthenticated ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <Link href="/modes" className="neon-btn-primary text-center py-3.5 text-base font-semibold">
+                    Play
+                  </Link>
+                  <Link href="/profile" className="neon-btn text-center py-3.5 text-base font-semibold">
+                    Open Profile
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                  <Link href="/signin" className="neon-btn-primary text-center py-3.5 text-base font-semibold">
+                    Sign In / Sign Up
+                  </Link>
+                  <Link href="/modes" className="neon-btn text-center py-3.5 text-base font-semibold">
+                    Continue as Guest
+                  </Link>
+                  <Link href="/signin" className="neon-btn text-center py-3.5 text-base font-semibold">
+                    Open Account
+                  </Link>
+                </div>
+              )}
 
               <div className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="rounded-2xl border border-[#d4deea] bg-white/90 p-4">
@@ -187,12 +215,12 @@ export default function Page() {
                   </div>
                 </Link>
 
-                <Link href="/game/neighbour-chain" className="block rounded-2xl bg-white/10 border border-white/20 p-4 hover:bg-white/15 transition-colors">
+                <Link href="/game/travel-chain" className="block rounded-2xl bg-white/10 border border-white/20 p-4 hover:bg-white/15 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Route size={18} className="text-[#9ee2bf]" />
+                    <Compass size={18} className="text-[#9ee2bf]" />
                     <div>
-                      <div className="font-semibold text-base">Neighbour Chain</div>
-                      <div className="text-sm text-[#bdd0e5]">Test border awareness and precision recall</div>
+                      <div className="font-semibold text-base">Travel Chain</div>
+                      <div className="text-sm text-[#bdd0e5]">Travel between two countries using the shortest border path</div>
                     </div>
                   </div>
                 </Link>

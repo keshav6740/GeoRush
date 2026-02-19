@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEventHandler, type PointerEventHandler, type WheelEventHandler } from 'react';
 import {
   normalizeCountryName,
   toWorldMapCountryNameVariants,
@@ -10,9 +10,16 @@ interface WorldGuessMapProps {
   guessedCountries: string[];
   revealedCountries?: string[];
   focusCountries?: string[];
+  startCountries?: string[];
+  endCountries?: string[];
   focusRegion?: 'Africa' | 'Americas' | 'Asia' | 'Europe' | 'Oceania';
   mapHeightClass?: string;
   title?: string;
+  enableZoomPan?: boolean;
+  enableTilt3d?: boolean;
+  hideNonScopeCountries?: boolean;
+  cropToFocus?: boolean;
+  interactionResetKey?: string;
 }
 
 interface GeoFeature {
@@ -55,6 +62,8 @@ const GEOJSON_URL =
 
 const WIDTH = 1000;
 const HEIGHT = 500;
+const GUESSED_FILL_COLOR = '#b8f4b8';
+const OCEAN_FILL_COLOR = '#bfe7ff';
 
 const REGION_BOUNDS: Record<
   NonNullable<WorldGuessMapProps['focusRegion']>,
@@ -242,12 +251,25 @@ export function WorldGuessMap({
   guessedCountries,
   revealedCountries = [],
   focusCountries = [],
+  startCountries = [],
+  endCountries = [],
   focusRegion,
   mapHeightClass = 'h-[360px] md:h-[560px]',
   title = 'Countries You Nailed',
+  enableZoomPan = false,
+  enableTilt3d = false,
+  hideNonScopeCountries = false,
+  cropToFocus = true,
+  interactionResetKey,
 }: WorldGuessMapProps) {
   const [data, setData] = useState<GeoData | null>(null);
   const [failed, setFailed] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const dragRef = useRef<{ x: number; y: number } | null>(null);
+  const resetKeyRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     let active = true;
@@ -297,6 +319,26 @@ export function WorldGuessMap({
     return set;
   }, [focusCountries]);
 
+  const startSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const country of startCountries) {
+      for (const variant of toWorldMapCountryNameVariants(country)) {
+        set.add(canonicalMapKey(variant));
+      }
+    }
+    return set;
+  }, [startCountries]);
+
+  const endSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const country of endCountries) {
+      for (const variant of toWorldMapCountryNameVariants(country)) {
+        set.add(canonicalMapKey(variant));
+      }
+    }
+    return set;
+  }, [endCountries]);
+
   const countries = useMemo(() => {
     if (!data?.features) return [];
     return data.features
@@ -313,12 +355,14 @@ export function WorldGuessMap({
           path,
           bounds,
           inScope: focusSet.size === 0 || focusSet.has(normalized) || forcedEuropeInScope,
+          isStart: startSet.has(normalized),
+          isEnd: endSet.has(normalized),
           guessed: guessedSet.has(normalized),
           revealed: revealedSet.has(normalized),
         };
       })
       .filter((country) => country.path);
-  }, [data, focusRegion, focusSet, guessedSet, revealedSet]);
+  }, [data, endSet, focusRegion, focusSet, guessedSet, revealedSet, startSet]);
 
   const guessedCount = countries.filter((country) => country.guessed).length;
   const revealedCount = countries.filter((country) => !country.guessed && country.revealed).length;
@@ -341,7 +385,7 @@ export function WorldGuessMap({
       };
     }
 
-    if (focusSet.size === 0) {
+    if (!cropToFocus || focusSet.size === 0) {
       return { minX: 0, minY: 0, width: WIDTH, height: HEIGHT };
     }
     const focusBounds = countries
@@ -358,7 +402,103 @@ export function WorldGuessMap({
       width: Math.max(10, padded.maxX - padded.minX),
       height: Math.max(10, padded.maxY - padded.minY),
     };
-  }, [countries, focusRegion, focusSet]);
+  }, [countries, cropToFocus, focusRegion, focusSet]);
+
+  useEffect(() => {
+    if (!enableZoomPan) return;
+    if (typeof interactionResetKey === 'string') {
+      if (resetKeyRef.current === interactionResetKey) return;
+      resetKeyRef.current = interactionResetKey;
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, [enableZoomPan, interactionResetKey, mapView.minX, mapView.minY, mapView.width, mapView.height, focusRegion]);
+
+  const clampPan = (nextX: number, nextY: number, nextZoom: number) => {
+    if (nextZoom <= 1) return { x: 0, y: 0 };
+    const maxX = (mapView.width * (nextZoom - 1)) / 2;
+    const maxY = (mapView.height * (nextZoom - 1)) / 2;
+    return {
+      x: Math.max(-maxX, Math.min(maxX, nextX)),
+      y: Math.max(-maxY, Math.min(maxY, nextY)),
+    };
+  };
+
+  const resetView = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  const adjustZoom = (delta: number) => {
+    if (!enableZoomPan) return;
+    setZoom((prev) => {
+      const next = Math.max(1, Math.min(6, Number((prev + delta).toFixed(2))));
+      if (next <= 1) {
+        setPan({ x: 0, y: 0 });
+      } else {
+        setPan((cur) => clampPan(cur.x, cur.y, next));
+      }
+      return next;
+    });
+  };
+
+  const handleWheel: WheelEventHandler<SVGSVGElement> = (event) => {
+    if (!enableZoomPan) return;
+    event.preventDefault();
+    const next = zoom + (event.deltaY > 0 ? -0.2 : 0.2);
+    const bounded = Math.max(1, Math.min(6, Number(next.toFixed(2))));
+    setZoom(bounded);
+    if (bounded <= 1) {
+      setPan({ x: 0, y: 0 });
+    } else {
+      setPan((cur) => clampPan(cur.x, cur.y, bounded));
+    }
+  };
+
+  const handlePointerDown: PointerEventHandler<SVGSVGElement> = (event) => {
+    if (!enableZoomPan || zoom <= 1) return;
+    dragRef.current = { x: event.clientX, y: event.clientY };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove: PointerEventHandler<SVGSVGElement> = (event) => {
+    if (!enableZoomPan || zoom <= 1 || !dragRef.current) return;
+    const last = dragRef.current;
+    dragRef.current = { x: event.clientX, y: event.clientY };
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const dxMap = ((event.clientX - last.x) / rect.width) * mapView.width;
+    const dyMap = ((event.clientY - last.y) / rect.height) * mapView.height;
+
+    setPan((cur) => clampPan(cur.x + dxMap, cur.y + dyMap, zoom));
+  };
+
+  const handlePointerUp: PointerEventHandler<SVGSVGElement> = (event) => {
+    if (!enableZoomPan) return;
+    dragRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const handleTiltMove: MouseEventHandler<HTMLDivElement> = (event) => {
+    if (!enableTilt3d) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width;
+    const py = (event.clientY - rect.top) / rect.height;
+    const rotateY = (px - 0.5) * 8;
+    const rotateX = (0.5 - py) * 6;
+    setTilt({ rotateX, rotateY });
+  };
+
+  const handleTiltLeave = () => {
+    if (!enableTilt3d) return;
+    setTilt({ rotateX: 0, rotateY: 0 });
+  };
 
   const tinyMarkers = useMemo(() => {
     const markers: TinyMarker[] = [];
@@ -368,7 +508,10 @@ export function WorldGuessMap({
       const revealed = !guessed && revealedSet.has(normalized);
       const inFocus = focusSet.size === 0 || focusSet.has(normalized);
       if (!inFocus && !guessed && !revealed) continue;
-      const pt = projectPoint(seed.lon, seed.lat);
+      // Oceania spans the anti-meridian. Mirror far-west Pacific marker longitudes
+      // so micro-island pins (e.g., Samoa/Tonga) remain visible in the focused crop.
+      const markerLon = focusRegion === 'Oceania' && seed.lon < -150 ? Math.abs(seed.lon) : seed.lon;
+      const pt = projectPoint(markerLon, seed.lat);
       markers.push({
         key: `manual-${seed.key}`,
         cx: pt.x,
@@ -387,60 +530,115 @@ export function WorldGuessMap({
         <span className="badge">{guessedCount} green {revealedCount > 0 ? `| ${revealedCount} red` : ''}</span>
       </div>
 
-      <div className="rounded-2xl overflow-hidden border border-[#d9dee5] bg-white">
+      <div
+        className="rounded-2xl overflow-hidden border border-[#d9dee5] bg-[#bfe7ff] transition-transform duration-150"
+        style={
+          enableTilt3d
+            ? {
+                transformStyle: 'preserve-3d',
+                transform: `perspective(1100px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+              }
+            : undefined
+        }
+        onMouseMove={handleTiltMove}
+        onMouseLeave={handleTiltLeave}
+      >
+        {enableZoomPan && (
+          <div className="flex items-center justify-end gap-2 border-b border-[#e5eaf2] bg-[#f8fbff] px-3 py-2">
+            <button type="button" onClick={() => adjustZoom(-0.2)} className="rounded-md border border-[#d8e0eb] bg-white px-2 py-1 text-xs text-[#1f2937]">
+              -
+            </button>
+            <span className="text-xs text-[#5a6b7a]">{Math.round(zoom * 100)}%</span>
+            <button type="button" onClick={() => adjustZoom(0.2)} className="rounded-md border border-[#d8e0eb] bg-white px-2 py-1 text-xs text-[#1f2937]">
+              +
+            </button>
+            <button type="button" onClick={resetView} className="rounded-md border border-[#d8e0eb] bg-white px-2 py-1 text-xs text-[#1f2937]">
+              Reset
+            </button>
+          </div>
+        )}
         {failed ? (
           <div className="p-8 text-center text-[#5a6b7a]">Map could not be loaded right now.</div>
         ) : (
           <svg
+            ref={svgRef}
             viewBox={`${mapView.minX} ${mapView.minY} ${mapView.width} ${mapView.height}`}
             preserveAspectRatio="xMidYMid meet"
-            className={`w-full ${mapHeightClass} block bg-white`}
+            className={`w-full ${mapHeightClass} block bg-[#bfe7ff] ${enableZoomPan ? 'cursor-grab active:cursor-grabbing' : ''}`}
             role="img"
             aria-label="World map with guessed countries highlighted"
+            onWheel={handleWheel}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            style={enableZoomPan ? { touchAction: 'none' } : undefined}
           >
-            <rect x="0" y="0" width={WIDTH} height={HEIGHT} fill="#ffffff" />
-            {countries.map((country) => (
-              <path
-                key={country.name}
-                d={country.path}
-                fill={
-                  country.guessed
-                    ? '#2a9d8f'
-                    : country.revealed
-                    ? '#e76f51'
-                    : country.inScope
-                    ? '#ffffff'
-                    : '#e5e7eb'
-                }
-                stroke={country.inScope ? '#6b7280' : '#cbd5e1'}
-                strokeWidth={country.inScope ? 0.45 : 0.35}
-              />
-            ))}
-            {tinyMarkers.map((marker) => (
-              <circle
-                key={`tiny-${marker.key}`}
-                cx={marker.cx}
-                cy={marker.cy}
-                r={2.2}
-                fill={marker.guessed ? '#2a9d8f' : marker.revealed ? '#e76f51' : '#ffffff'}
-                stroke="#334155"
-                strokeWidth={0.6}
-              />
-            ))}
+            <g
+              transform={`translate(${pan.x.toFixed(2)} ${pan.y.toFixed(2)}) translate(${(mapView.minX + mapView.width / 2).toFixed(2)} ${(mapView.minY + mapView.height / 2).toFixed(2)}) scale(${zoom.toFixed(3)}) translate(${(-(mapView.minX + mapView.width / 2)).toFixed(2)} ${(-(mapView.minY + mapView.height / 2)).toFixed(2)})`}
+            >
+              <rect x="0" y="0" width={WIDTH} height={HEIGHT} fill={OCEAN_FILL_COLOR} />
+              {countries.map((country) => (
+                <path
+                  key={country.name}
+                  d={country.path}
+                  fill={
+                    country.isStart
+                      ? '#e76f51'
+                      : country.isEnd
+                      ? '#2a9d8f'
+                      : country.guessed
+                      ? GUESSED_FILL_COLOR
+                      : country.revealed
+                      ? '#e76f51'
+                      : country.inScope
+                      ? '#ffffff'
+                      : hideNonScopeCountries
+                      ? 'transparent'
+                      : '#e5e7eb'
+                  }
+                  stroke={country.inScope ? '#6b7280' : hideNonScopeCountries ? 'none' : '#cbd5e1'}
+                  strokeWidth={country.inScope ? 0.45 : 0.35}
+                />
+              ))}
+              {tinyMarkers.map((marker) => (
+                <circle
+                  key={`tiny-${marker.key}`}
+                  cx={marker.cx}
+                  cy={marker.cy}
+                  r={2.2}
+                  fill={marker.guessed ? GUESSED_FILL_COLOR : marker.revealed ? '#e76f51' : '#ffffff'}
+                  stroke="#334155"
+                  strokeWidth={0.6}
+                />
+              ))}
+            </g>
           </svg>
         )}
       </div>
 
       <div className="mt-4 flex items-center gap-3 text-sm text-[#5a6b7a]">
+        {startSet.size > 0 && (
+          <span className="inline-flex items-center gap-1">
+            <span className="h-3 w-3 rounded-full bg-[#e76f51] inline-block" />
+            Start
+          </span>
+        )}
+        {endSet.size > 0 && (
+          <span className="inline-flex items-center gap-1">
+            <span className="h-3 w-3 rounded-full bg-[#2a9d8f] inline-block" />
+            End
+          </span>
+        )}
         <span className="inline-flex items-center gap-1">
-          <span className="h-3 w-3 rounded-full bg-[#2a9d8f] inline-block" />
+          <span className="h-3 w-3 rounded-full inline-block" style={{ backgroundColor: GUESSED_FILL_COLOR }} />
           Guessed
         </span>
         <span className="inline-flex items-center gap-1">
           <span className="h-3 w-3 rounded-full bg-[#e76f51] inline-block" />
           Revealed
         </span>
-        {focusSet.size > 0 && (
+        {focusSet.size > 0 && !hideNonScopeCountries && (
           <span className="inline-flex items-center gap-1">
             <span className="h-3 w-3 rounded-full bg-[#e5e7eb] inline-block" />
             Not in quiz

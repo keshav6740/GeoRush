@@ -46,10 +46,10 @@ export const MOCK_LEADERBOARD: LeaderboardEntry[] = [
   { rank: 2, name: 'WorldWanderer', score: 82, accuracy: 92, gameMode: 'Speed Run' },
   { rank: 3, name: 'MapKing', score: 76, accuracy: 88, gameMode: 'Speed Run' },
   { rank: 4, name: 'CountryCollector', score: 71, accuracy: 85, gameMode: 'Speed Run' },
-  { rank: 5, name: 'BorderFinder', score: 65, accuracy: 82, gameMode: 'Neighbour Chain' },
+  { rank: 5, name: 'BorderFinder', score: 65, accuracy: 82, gameMode: 'Border Rush' },
   { rank: 6, name: 'CapitalGeek', score: 58, accuracy: 79, gameMode: 'Country to Capital' },
   { rank: 7, name: 'ContinentKnower', score: 52, accuracy: 75, gameMode: 'Speed Run' },
-  { rank: 8, name: 'AtlasExpert', score: 48, accuracy: 72, gameMode: 'Neighbour Chain' },
+  { rank: 8, name: 'AtlasExpert', score: 48, accuracy: 72, gameMode: 'Border Rush' },
 ];
 
 export function hashString(input: string): number {

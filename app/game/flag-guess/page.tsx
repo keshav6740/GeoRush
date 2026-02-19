@@ -1,23 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { InputBox } from '@/components/game/InputBox';
 import { ResultsCard } from '@/components/results/ResultsCard';
 import { WorldGuessMap } from '@/components/results/WorldGuessMap';
-import { COUNTRIES, getCapital, normalizeText } from '@/lib/countries';
-
-type QuizMode = 'country-to-capital' | 'capital-to-country';
+import { COUNTRY_NAMES, COUNTRIES } from '@/lib/countries';
+import {
+  buildCountryLookup,
+  resolveGuessToCountry,
+  toWorldMapCountryName,
+} from '@/lib/countryNameUtils';
 
 interface RoundResult {
   country: string;
-  prompt: string;
-  expectedAnswer: string;
   correct: boolean;
   userAnswer?: string;
-  capital: string;
   timeToAnswer: number;
 }
+
+const FLAG_CACHE = new Map<string, string | null>();
 
 function pickRandomCountries(count: number) {
   const shuffled = [...COUNTRIES];
@@ -28,79 +30,109 @@ function pickRandomCountries(count: number) {
   return shuffled.slice(0, count);
 }
 
-export default function CapitalGuessPage() {
-  const [mode, setMode] = useState<QuizMode>('country-to-capital');
+function getFlagNameCandidates(countryName: string) {
+  const mapped = toWorldMapCountryName(countryName);
+  const aliasMap: Record<string, string[]> = {
+    "Cote d'Ivoire": ['Ivory Coast'],
+    "Côte d'Ivoire": ['Ivory Coast'],
+    Macedonia: ['North Macedonia'],
+    Swaziland: ['Eswatini'],
+    'Timor-Leste': ['East Timor'],
+    'Republic of the Congo': ['Congo'],
+    'Democratic Republic of the Congo': ['DR Congo'],
+    'United States': ['United States of America'],
+    Vatican: ['Vatican City', 'Holy See'],
+    'Cape Verde': ['Cabo Verde'],
+  };
+
+  return Array.from(new Set([countryName, mapped, ...(aliasMap[countryName] ?? [])]));
+}
+
+async function fetchFlagUrl(countryName: string): Promise<string | null> {
+  const cached = FLAG_CACHE.get(countryName);
+  if (typeof cached !== 'undefined') return cached;
+
+  const names = getFlagNameCandidates(countryName);
+  for (const name of names) {
+    const fullTextUrl = `https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`;
+    const fallbackUrl = `https://restcountries.com/v3.1/name/${encodeURIComponent(name)}`;
+    for (const endpoint of [fullTextUrl, fallbackUrl]) {
+      try {
+        const response = await fetch(endpoint);
+        if (!response.ok) continue;
+        const payload = (await response.json()) as Array<{ flags?: { svg?: string; png?: string } }>;
+        const flag = payload[0]?.flags?.svg || payload[0]?.flags?.png || null;
+        if (flag) {
+          FLAG_CACHE.set(countryName, flag);
+          return flag;
+        }
+      } catch {
+        // Try next candidate endpoint.
+      }
+    }
+  }
+
+  FLAG_CACHE.set(countryName, null);
+  return null;
+}
+
+export default function FlagGuessPage() {
   const [gameStarted, setGameStarted] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
   const [roundResults, setRoundResults] = useState<RoundResult[]>([]);
   const [roundStartTime, setRoundStartTime] = useState<number>(0);
   const [countries, setCountries] = useState<typeof COUNTRIES>([]);
-  const [showCountry, setShowCountry] = useState(true);
-  const [feedback, setFeedback] = useState<{ correct: boolean; answer: string; expectedAnswer: string; bonus: number } | null>(null);
+  const [flagByCountry, setFlagByCountry] = useState<Record<string, string | null>>({});
+  const [flagsLoading, setFlagsLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ correct: boolean; expectedCountry: string; bonus: number } | null>(null);
   const [locked, setLocked] = useState(false);
   const ROUNDS = 10;
-  const modeConfig = {
-    'country-to-capital': {
-      title: 'Country to Capital',
-      subtitle: 'Instant recall challenge',
-      formatBlurb: 'Countries flash briefly, then type the capital. Faster = more points!',
-      promptPrefix: 'What is the capital of:',
-      hiddenPromptText: 'Type the capital from memory.',
-      inputPlaceholder: 'Type the capital...',
-    },
-    'capital-to-country': {
-      title: 'Capital to Country',
-      subtitle: 'Reverse recall challenge',
-      formatBlurb: 'Capitals flash briefly, then type the country. Faster = more points!',
-      promptPrefix: 'Which country has this capital:',
-      hiddenPromptText: 'Type the country from memory.',
-      inputPlaceholder: 'Type the country...',
-    },
-  } as const;
 
-  // Initialize game with shuffled countries
+  const countryLookup = useMemo(() => buildCountryLookup(COUNTRY_NAMES), []);
+  const currentCountry = countries[currentRoundIdx];
+  const currentFlag = currentCountry ? flagByCountry[currentCountry.name] : null;
+  const progress = currentRoundIdx + 1;
+
   useEffect(() => {
     setCountries(pickRandomCountries(ROUNDS));
   }, []);
+
+  useEffect(() => {
+    if (countries.length === 0) return;
+    let active = true;
+    setFlagsLoading(true);
+    void Promise.all(
+      countries.map(async (country) => [country.name, await fetchFlagUrl(country.name)] as const)
+    )
+      .then((entries) => {
+        if (!active) return;
+        setFlagByCountry(Object.fromEntries(entries));
+      })
+      .finally(() => {
+        if (active) setFlagsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [countries]);
 
   const handleStartGame = () => {
     setGameStarted(true);
     setRoundStartTime(Date.now());
   };
 
-  const currentCountry = countries[currentRoundIdx];
-  const currentCapital = currentCountry ? getCapital(currentCountry.name) || '' : '';
-  const currentPrompt =
-    mode === 'country-to-capital' ? currentCountry?.name ?? '' : currentCapital;
-  const progress = currentRoundIdx + 1;
-
-  useEffect(() => {
-    if (!gameStarted || !currentCountry) return;
-    setShowCountry(true);
-    const timer = setTimeout(() => setShowCountry(false), 2000);
-    return () => clearTimeout(timer);
-  }, [gameStarted, currentCountry, currentRoundIdx]);
-
-  const handleAnswerSubmit = (answer: string): boolean => {
+  const finalizeRound = (isCorrect: boolean, userAnswer: string) => {
     if (!currentCountry) return false;
     if (locked) return false;
 
-    const correctCapital = getCapital(currentCountry.name) || '';
-    const expectedAnswer = mode === 'country-to-capital' ? correctCapital : currentCountry.name;
-    const prompt = mode === 'country-to-capital' ? currentCountry.name : correctCapital;
-    const isCorrect =
-      normalizeText(answer) === normalizeText(expectedAnswer);
     const timeToAnswer = (Date.now() - roundStartTime) / 1000;
     const bonus = isCorrect ? Math.max(10, 100 - Math.round(timeToAnswer) * 5) : 0;
 
     const newRoundResult: RoundResult = {
       country: currentCountry.name,
-      prompt,
-      expectedAnswer,
       correct: isCorrect,
-      userAnswer: answer,
-      capital: correctCapital,
+      userAnswer,
       timeToAnswer: Math.round(timeToAnswer),
     };
 
@@ -108,8 +140,7 @@ export default function CapitalGuessPage() {
     setRoundResults(updatedResults);
     setFeedback({
       correct: isCorrect,
-      answer,
-      expectedAnswer,
+      expectedCountry: currentCountry.name,
       bonus,
     });
     setLocked(true);
@@ -129,6 +160,19 @@ export default function CapitalGuessPage() {
     return true;
   };
 
+  const handleAnswerSubmit = (answer: string): boolean => {
+    if (!currentCountry) return false;
+    if (locked) return false;
+    const resolved = resolveGuessToCountry(answer, countryLookup);
+    return finalizeRound(resolved === currentCountry.name, answer);
+  };
+
+  const handleRevealAndSkip = () => {
+    if (!currentCountry) return;
+    if (locked) return;
+    void finalizeRound(false, 'Revealed');
+  };
+
   const handlePlayAgain = () => {
     setCountries(pickRandomCountries(ROUNDS));
     setCurrentRoundIdx(0);
@@ -145,39 +189,18 @@ export default function CapitalGuessPage() {
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="neon-card p-8 max-w-md w-full text-center space-y-6 animate-float-up">
           <div>
-            <h1 className="text-4xl font-bold gradient-text mb-3">Capital Guess</h1>
-            <p className="text-[#5a6b7a]">{modeConfig[mode].subtitle}</p>
+            <h1 className="text-4xl font-bold gradient-text mb-3">Flag Guess</h1>
+            <p className="text-[#5a6b7a]">See a flag, name the country</p>
           </div>
-          <div className="grid grid-cols-2 gap-2 rounded-lg border border-[#d8e0eb] bg-white p-2">
-            <button
-              onClick={() => setMode('country-to-capital')}
-              className={`rounded-md px-3 py-2 text-sm font-semibold ${
-                mode === 'country-to-capital' ? 'bg-[#1f6feb] text-white' : 'text-[#1f2937] hover:bg-[#f5f8fc]'
-              }`}
-            >
-              Country -&gt; Capital
-            </button>
-            <button
-              onClick={() => setMode('capital-to-country')}
-              className={`rounded-md px-3 py-2 text-sm font-semibold ${
-                mode === 'capital-to-country' ? 'bg-[#1f6feb] text-white' : 'text-[#1f2937] hover:bg-[#f5f8fc]'
-              }`}
-            >
-              Capital -&gt; Country
-            </button>
-          </div>
-          <div className="bg-[#ffffff] rounded-lg p-6 border border-[#e76f51] border-opacity-30">
+          <div className="bg-[#ffffff] rounded-lg p-6 border border-[#1f6feb] border-opacity-30">
             <p className="text-[#9aa6b2] text-sm mb-2">Game Format</p>
-            <p className="text-lg font-bold text-[#1f2937] mb-3">{ROUNDS} Countries</p>
+            <p className="text-lg font-bold text-[#1f2937] mb-3">{ROUNDS} Flags</p>
             <p className="text-[#5a6b7a] text-sm">
-              {modeConfig[mode].formatBlurb}
+              Guess the country from each flag. Faster correct answers earn more points. You can reveal and skip if stuck.
             </p>
           </div>
-          <button
-            onClick={handleStartGame}
-            className="neon-btn-primary w-full py-3 text-lg"
-          >
-            Start Challenge
+          <button onClick={handleStartGame} className="neon-btn-primary w-full py-3 text-lg" disabled={flagsLoading}>
+            {flagsLoading ? 'Loading Flags...' : 'Start Challenge'}
           </button>
           <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
             Back to Modes
@@ -188,7 +211,7 @@ export default function CapitalGuessPage() {
   }
 
   if (showResults) {
-    const correctCount = roundResults.filter(r => r.correct).length;
+    const correctCount = roundResults.filter((r) => r.correct).length;
     const correctCountries = roundResults.filter((r) => r.correct).map((r) => r.country);
     const totalScore = roundResults.reduce((sum, r) => {
       if (r.correct) {
@@ -203,7 +226,7 @@ export default function CapitalGuessPage() {
         <div className="max-w-6xl mx-auto space-y-6 w-full">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
             <ResultsCard
-              gameMode={modeConfig[mode].title}
+              gameMode="Flag Guess"
               score={totalScore}
               correct={correctCount}
               total={ROUNDS}
@@ -228,26 +251,20 @@ export default function CapitalGuessPage() {
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-bold text-[#1f2937]">{result.prompt}</p>
-                        <p className="text-sm text-[#5a6b7a]">
-                          Answer: {result.userAnswer}
-                        </p>
-                        <p className="text-xs text-[#9aa6b2]">
-                          Correct: {result.expectedAnswer} ({result.timeToAnswer}s)
-                        </p>
+                        <p className="font-bold text-[#1f2937]">{result.country}</p>
+                        <p className="text-sm text-[#5a6b7a]">Answer: {result.userAnswer}</p>
+                        <p className="text-xs text-[#9aa6b2]">Time: {result.timeToAnswer}s</p>
                       </div>
-                      <span className="text-xl">
-                        {result.correct ? 'Correct' : 'Wrong'}
-                      </span>
+                      <span className="text-xl">{result.correct ? 'Correct' : 'Wrong'}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             <div className="text-center mt-6">
-              <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
-                Back to Modes
-              </Link>
+              <button onClick={handlePlayAgain} className="neon-btn-primary px-6 py-3">
+                Play Again
+              </button>
             </div>
           </div>
         </div>
@@ -268,13 +285,11 @@ export default function CapitalGuessPage() {
   return (
     <main className="min-h-screen px-4 py-12">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#1f2937] mb-2">{modeConfig[mode].title}</h1>
+          <h1 className="text-3xl font-bold text-[#1f2937] mb-2">Flag Guess</h1>
           <p className="text-[#5a6b7a]">Round {progress}/{ROUNDS}</p>
         </div>
 
-        {/* Progress Bar */}
         <div className="mb-8">
           <div className="w-full bg-[#f8fafc] rounded-full h-2 border border-[#1f6feb] border-opacity-30">
             <div
@@ -284,24 +299,26 @@ export default function CapitalGuessPage() {
           </div>
         </div>
 
-        {/* Country Display */}
         <div className="neon-card p-8 mb-8 text-center animate-float-up">
-          <p className="text-[#9aa6b2] text-sm mb-4">{modeConfig[mode].promptPrefix}</p>
-          <p className="text-5xl font-bold text-[#1f6feb] mb-4">
-            {showCountry ? currentPrompt : '???'}
-          </p>
-          <p className="text-[#5a6b7a] text-sm">
-            {showCountry ? 'This prompt will hide in 2 seconds...' : modeConfig[mode].hiddenPromptText}
-          </p>
+          <p className="text-[#9aa6b2] text-sm mb-4">Which country does this flag belong to?</p>
+          {currentFlag ? (
+            <div className="mx-auto w-full max-w-md rounded-xl overflow-hidden border border-[#d8e0eb] bg-white">
+              <img src={currentFlag} alt="Country flag" className="w-full h-56 object-cover" />
+            </div>
+          ) : (
+            <div className="mx-auto w-full max-w-md rounded-xl border border-[#d8e0eb] bg-white/70 h-56 grid place-items-center text-[#5a6b7a]">
+              Flag unavailable for this round.
+            </div>
+          )}
         </div>
 
-        {/* Input */}
         <div className="mb-8">
-          <InputBox
-            onSubmit={handleAnswerSubmit}
-            placeholder={modeConfig[mode].inputPlaceholder}
-            disabled={locked}
-          />
+          <InputBox onSubmit={handleAnswerSubmit} placeholder="Type the country..." disabled={locked} />
+          <div className="mt-3 flex justify-center">
+            <button onClick={handleRevealAndSkip} disabled={locked} className="neon-btn px-4 py-2 text-sm disabled:opacity-60">
+              Reveal &amp; Skip
+            </button>
+          </div>
         </div>
 
         {feedback && (
@@ -310,17 +327,10 @@ export default function CapitalGuessPage() {
               {feedback.correct ? 'Correct!' : 'Not quite'}
             </p>
             <p className="text-sm text-[#5a6b7a]">
-              {feedback.correct ? `+${feedback.bonus} pts` : `Correct answer: ${feedback.expectedAnswer}`}
+              {feedback.correct ? `+${feedback.bonus} pts` : `Correct answer: ${feedback.expectedCountry}`}
             </p>
           </div>
         )}
-
-        {/* Hint */}
-        <div className="text-center">
-          <p className="text-sm text-[#9aa6b2]">
-            Faster answers earn more points!
-          </p>
-        </div>
       </div>
     </main>
   );

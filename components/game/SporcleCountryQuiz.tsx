@@ -155,17 +155,21 @@ export function SporcleCountryQuiz({
     return (
       <main className="min-h-screen px-4 py-6 md:py-8">
         <div className="max-w-7xl mx-auto space-y-6">
-          {emphasizeMap ? (
-            <WorldGuessMap
-              guessedCountries={guessedCountries}
-              revealedCountries={revealedCountries}
-              focusCountries={targetList}
-              focusRegion={focusRegion}
-              mapHeightClass={mapHeightClass ?? 'h-[420px] md:h-[760px]'}
-              title="Guessed Countries"
-            />
-          ) : (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+          <div
+            className={`grid grid-cols-1 gap-6 items-start ${
+              emphasizeMap ? 'xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]' : 'xl:grid-cols-2'
+            }`}
+          >
+            {emphasizeMap ? (
+              <WorldGuessMap
+                guessedCountries={guessedCountries}
+                revealedCountries={revealedCountries}
+                focusCountries={targetList}
+                focusRegion={focusRegion}
+                mapHeightClass={mapHeightClass ?? 'h-[420px] md:h-[760px]'}
+                title="Guessed Countries"
+              />
+            ) : (
               <ResultsCard
                 gameMode={gameMode}
                 score={score}
@@ -175,18 +179,7 @@ export function SporcleCountryQuiz({
                 timeRemainingSeconds={timeRemaining}
                 countriesGuessed={guessedCountries}
               />
-              <WorldGuessMap
-                guessedCountries={guessedCountries}
-                revealedCountries={revealedCountries}
-                focusCountries={targetList}
-                focusRegion={focusRegion}
-                mapHeightClass={mapHeightClass}
-                title="Guessed Countries"
-              />
-            </div>
-          )}
-
-          {emphasizeMap && (
+            )}
             <ResultsCard
               gameMode={gameMode}
               score={score}
@@ -196,7 +189,17 @@ export function SporcleCountryQuiz({
               timeRemainingSeconds={timeRemaining}
               countriesGuessed={guessedCountries}
             />
-          )}
+            {!emphasizeMap && (
+              <WorldGuessMap
+                guessedCountries={guessedCountries}
+                revealedCountries={revealedCountries}
+                focusCountries={targetList}
+                focusRegion={focusRegion}
+                mapHeightClass={mapHeightClass}
+                title="Guessed Countries"
+              />
+            )}
+          </div>
 
           <div className="neon-card p-6">
             <div className="flex items-center justify-between mb-4">
@@ -244,16 +247,16 @@ export function SporcleCountryQuiz({
   }
 
   return (
-    <main className={`${emphasizeMap ? 'min-h-screen md:h-screen md:overflow-hidden' : 'min-h-screen'} px-4 py-3 md:py-4`}>
+    <main className="min-h-screen px-4 py-3 md:py-4">
       <div className={`max-w-7xl mx-auto ${emphasizeMap ? 'h-full space-y-3' : 'grid grid-cols-1 xl:grid-cols-2 gap-6 items-start'}`}>
         {emphasizeMap && (
-          <div className="neon-card p-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="min-w-[200px]">
-                <h1 className="text-2xl font-bold text-[#1f2937] leading-tight">{title}</h1>
-                <p className="text-[#5a6b7a] text-xs">{subtitle}</p>
+          <div className="neon-card p-3 md:p-4">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl md:text-2xl font-bold text-[#1f2937] leading-tight">{title}</h1>
+                <p className="text-[#5a6b7a] text-xs md:text-sm">{subtitle}</p>
               </div>
-              <div className="grid grid-cols-3 gap-2 w-full md:w-auto md:min-w-[320px]">
+              <div className="grid grid-cols-3 gap-2 w-full sm:w-auto sm:min-w-[320px]">
                 <div className="stat-card !p-2">
                   <div className="stat-title">Guessed</div>
                   <div className="stat-value !text-base">{guessedCountries.length}</div>
@@ -267,7 +270,7 @@ export function SporcleCountryQuiz({
                   <div className="stat-value !text-base">{formatTime(timeRemaining)}</div>
                 </div>
               </div>
-              <form onSubmit={handleSubmit} className="flex-1 min-w-[220px]">
+              <form onSubmit={handleSubmit} className="w-full sm:flex-1 sm:min-w-[220px]">
                 <input
                   type="text"
                   value={input}
@@ -278,7 +281,7 @@ export function SporcleCountryQuiz({
                   className="input-neon w-full text-lg"
                 />
               </form>
-              <button onClick={handleGiveUp} className="neon-btn px-4 py-2 text-sm whitespace-nowrap">
+              <button onClick={handleGiveUp} className="neon-btn px-4 py-2 text-sm whitespace-nowrap w-full sm:w-auto">
                 Give Up
               </button>
             </div>
@@ -290,7 +293,7 @@ export function SporcleCountryQuiz({
             guessedCountries={guessedCountries}
             focusCountries={targetList}
             focusRegion={focusRegion}
-            mapHeightClass={mapHeightClass ?? 'h-[52vh] md:h-[calc(100vh-190px)]'}
+            mapHeightClass={mapHeightClass ?? 'h-[52vh] md:h-[calc(100svh-220px)]'}
             title="Live Fill Map"
           />
         )}

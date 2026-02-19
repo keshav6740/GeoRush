@@ -80,7 +80,7 @@ interface DuelRoomView {
 const MODE_CARDS: Array<{ key: DuelMode; title: string; subtitle: string }> = [
   { key: 'world-quiz', title: 'World Quiz', subtitle: '197 countries in 15 minutes' },
   { key: 'continent-quiz', title: 'Continent Quiz', subtitle: 'Pick continent, type all countries' },
-  { key: 'neighbour-chain', title: 'Neighbour Chain', subtitle: 'Border knowledge battle' },
+  { key: 'neighbour-chain', title: 'Border Rush', subtitle: 'Border knowledge battle' },
   { key: 'capital-guess', title: 'Capital Guess', subtitle: 'Country to capital race' },
 ];
 
@@ -418,18 +418,18 @@ export default function DuelRoomPage() {
   if (!room) return null;
 
   return (
-    <main className="min-h-screen px-4 py-8">
+    <main className="min-h-screen px-4 py-6 md:py-8">
       <div className="mx-auto max-w-6xl space-y-4">
         <section className="rounded-2xl border border-[#d7e3f5] bg-white p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[#6c7d93]">1v1 Duel</p>
-              <h1 className="text-2xl font-black text-[#12243a]">{modeTitle(room.mode)}</h1>
-              <p className="text-sm text-[#5a6b7a]">Room: <span className="font-bold">{room.code}</span> | Best of {room.series.bestOf} (Match {room.series.currentMatchNumber})</p>
+              <h1 className="text-xl md:text-2xl font-black text-[#12243a]">{modeTitle(room.mode)}</h1>
+              <p className="text-sm text-[#5a6b7a] break-words">Room: <span className="font-bold">{room.code}</span> | Best of {room.series.bestOf} (Match {room.series.currentMatchNumber})</p>
             </div>
-            <div className="flex gap-2">
-              <button onClick={handleCopyLink} className="neon-btn px-4 py-2 text-sm"><Copy size={14} className="mr-1" />Invite</button>
-              <Link href="/duel" className="neon-btn px-4 py-2 text-sm">Lobby</Link>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button onClick={handleCopyLink} className="neon-btn px-4 py-2 text-sm flex-1 sm:flex-none"><Copy size={14} className="mr-1" />Invite</button>
+              <Link href="/duel" className="neon-btn px-4 py-2 text-sm flex-1 sm:flex-none text-center">Lobby</Link>
             </div>
           </div>
           {flash && <p className="mt-2 text-sm text-[#1f6feb]">{flash}</p>}
@@ -497,7 +497,7 @@ export default function DuelRoomPage() {
 
         {room.status === 'active' && (
           <section className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-4">
-            <WorldGuessMap guessedCountries={guessedCountries} focusCountries={focusCountries} focusRegion={room.focusRegion} title="Live Duel Map" mapHeightClass="h-[360px] md:h-[620px]" />
+            <WorldGuessMap guessedCountries={guessedCountries} focusCountries={focusCountries} focusRegion={room.focusRegion} title="Live Duel Map" mapHeightClass="h-[320px] sm:h-[360px] md:h-[620px]" />
             <div className="rounded-2xl border border-[#d7e3f5] bg-white p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-[#5a6b7a]">{isCountryFillMode ? `Guessed ${guessedCountries.length}/${room.targetCountries.length}` : `Question ${Math.min(currentQuestionIdx + 1, room.rounds)}/${room.rounds}`}</p>
@@ -524,7 +524,7 @@ export default function DuelRoomPage() {
                 <>
                   <div className="rounded-xl border border-[#d7e3f5] bg-[#f7fbff] p-4">
                     <p className="text-xs uppercase tracking-[0.15em] text-[#6c7d93]">Prompt</p>
-                    <p className="text-2xl font-black text-[#13243a] mt-1">{currentQuestion.prompt}</p>
+                    <p className="text-xl md:text-2xl font-black text-[#13243a] mt-1 break-words">{currentQuestion.prompt}</p>
                   </div>
                   {!isSpectator && (
                     <div className="space-y-2">

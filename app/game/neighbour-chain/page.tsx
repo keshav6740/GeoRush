@@ -6,7 +6,8 @@ import { InputBox } from '@/components/game/InputBox';
 import { useNeighbourChain } from '@/hooks/useGame';
 import { getNeighbors, COUNTRY_NAMES } from '@/lib/countries';
 import { getComparisonMessage } from '@/lib/gameLogic';
-import { getOrCreatePlayerIdentity } from '@/lib/playerId';
+import { savePendingScore } from '@/lib/pendingScore';
+import { getAuthSession, getOrCreatePlayerIdentity } from '@/lib/playerId';
 
 export default function NeighbourChainPage() {
   const [gameStarted, setGameStarted] = useState(false);
@@ -14,6 +15,7 @@ export default function NeighbourChainPage() {
   const [showResults, setShowResults] = useState(false);
   const [resultRank, setResultRank] = useState<number | null>(null);
   const [resultBetterThan, setResultBetterThan] = useState<number | null>(null);
+  const [showGuestSavePrompt, setShowGuestSavePrompt] = useState(false);
   const {
     neighbors,
     answered,
@@ -34,6 +36,15 @@ export default function NeighbourChainPage() {
   useEffect(() => {
     if (!showResults) return;
     const accuracy = Math.round((answered.length / Math.max(1, neighbors.length)) * 100);
+    const session = getAuthSession();
+    if (!session.isAuthenticated) {
+      setShowGuestSavePrompt(true);
+      setResultRank(null);
+      setResultBetterThan(Math.max(0, Math.min(99, Math.round(accuracy * 0.9))));
+      return;
+    }
+
+    setShowGuestSavePrompt(false);
     const { playerId, playerName } = getOrCreatePlayerIdentity();
     void fetch('/api/leaderboard', {
       method: 'POST',
@@ -43,7 +54,7 @@ export default function NeighbourChainPage() {
       body: JSON.stringify({
         playerId,
         playerName,
-        gameMode: 'Neighbour Chain',
+        gameMode: 'Border Rush',
         score,
         correct: answered.length,
         total: neighbors.length,
@@ -87,6 +98,18 @@ export default function NeighbourChainPage() {
     handleStartGame();
   };
 
+  const handleSignInToSave = () => {
+    savePendingScore({
+      gameMode: 'Border Rush',
+      score,
+      correct: answered.length,
+      total: neighbors.length,
+      durationSeconds: Math.max(20, neighbors.length * 20),
+      countriesGuessed: answered,
+    });
+    window.location.href = '/signin?next=/profile&saveScore=1';
+  };
+
   const handleAnswerSubmit = (answer: string): boolean => {
     return submitAnswer(answer);
   };
@@ -96,7 +119,7 @@ export default function NeighbourChainPage() {
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="neon-card p-8 max-w-md w-full text-center space-y-6 animate-float-up">
           <div>
-            <h1 className="text-4xl font-bold gradient-text mb-3">Neighbour Chain</h1>
+            <h1 className="text-4xl font-bold gradient-text mb-3">Border Rush</h1>
             <p className="text-[#5a6b7a]">Name all bordering countries</p>
           </div>
           <div className="bg-[#ffffff] rounded-lg p-6 border border-[#1f6feb] border-opacity-30">
@@ -127,13 +150,16 @@ export default function NeighbourChainPage() {
       resultBetterThan ?? Math.max(0, Math.min(99, Math.round(accuracy * 0.9)));
     const comparisonMessage = getComparisonMessage(betterThan);
     const shareParams = new URLSearchParams({
-      mode: 'Neighbour Chain',
+      mode: 'Border Rush',
       score: String(score),
       accuracy: String(accuracy),
       correct: String(answered.length),
       total: String(neighbors.length),
       date: new Date().toISOString().slice(0, 10),
     });
+    if (answered.length > 0) {
+      shareParams.set('countries', JSON.stringify(answered.slice(0, 240)));
+    }
     const shareUrl = `/api/share?${shareParams.toString()}`;
     return (
       <main className="min-h-screen px-4 py-12">
@@ -143,7 +169,7 @@ export default function NeighbourChainPage() {
               <h1 className="text-4xl font-bold gradient-text mb-2">
                 {!failed ? 'Perfect!' : 'Round Over'}
               </h1>
-              <p className="text-[#5a6b7a]">Neighbour Chain Challenge</p>
+              <p className="text-[#5a6b7a]">Border Rush Challenge</p>
             </div>
 
             {/* Results Stats */}
@@ -166,6 +192,22 @@ export default function NeighbourChainPage() {
               <p className="text-[#5a6b7a] text-sm mt-1">Rank: {resultRank ? `#${resultRank}` : '-'}</p>
               <p className="text-[#5a6b7a] text-sm mt-1">Beat your high score?</p>
             </div>
+
+            {showGuestSavePrompt && (
+              <div className="bg-[#eff6ff] rounded-lg p-4 border border-[#93c5fd] border-opacity-70 space-y-3">
+                <p className="text-sm text-[#1f2937]">
+                  You played as a guest. Sign in to save this score to the leaderboard.
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  <button onClick={handleSignInToSave} className="neon-btn-primary w-full py-2.5">
+                    Sign In to Save Score
+                  </button>
+                  <button onClick={() => setShowGuestSavePrompt(false)} className="neon-btn w-full py-2.5">
+                    Not Now
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Correct Answers */}
             <div>
@@ -228,7 +270,7 @@ export default function NeighbourChainPage() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#1f2937] mb-2">Neighbour Chain</h1>
+          <h1 className="text-3xl font-bold text-[#1f2937] mb-2">Border Rush</h1>
           <p className="text-[#5a6b7a]">Name all {neighbors.length} bordering countries</p>
         </div>
 

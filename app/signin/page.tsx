@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Earth, KeyRound, MapPinned } from 'lucide-react';
+import { clearPendingScore, loadPendingScore } from '@/lib/pendingScore';
 import {
   getAuthSession,
   getOrCreatePlayerIdentity,
@@ -35,12 +36,19 @@ export default function SignInPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [redirectPath, setRedirectPath] = useState('/profile');
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get('next');
+    if (next && next.startsWith('/') && !next.startsWith('//')) {
+      setRedirectPath(next);
+    }
+
     const session = getAuthSession();
     if (session.isAuthenticated) {
-      window.location.href = '/profile';
+      window.location.href = next && next.startsWith('/') && !next.startsWith('//') ? next : '/profile';
       return;
     }
     if (session.localUsername) {
@@ -70,6 +78,29 @@ export default function SignInPage() {
     });
   };
 
+  const submitPendingScoreIfAny = async () => {
+    const pendingScore = loadPendingScore();
+    if (!pendingScore) return;
+
+    const { playerId, playerName } = getOrCreatePlayerIdentity();
+    try {
+      const response = await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          playerId,
+          playerName,
+          ...pendingScore,
+        }),
+      });
+      if (response.ok) {
+        clearPendingScore();
+      }
+    } catch {
+      // Keep pending score for a future retry.
+    }
+  };
+
   const handleLocalSubmit = async () => {
     setBusy(true);
     setMessage(null);
@@ -85,7 +116,8 @@ export default function SignInPage() {
       }
 
       await upsertProfile();
-      window.location.href = '/profile';
+      await submitPendingScoreIfAny();
+      window.location.href = redirectPath;
     } catch {
       setMessage('Could not complete authentication.');
     } finally {
@@ -145,9 +177,13 @@ export default function SignInPage() {
               setMessage('Could not link Google account.');
               return;
             }
-            setPlayerId(linkedPlayerId);
-            setGoogleLinkedProfile(linkedGoogle);
-            window.location.href = '/profile';
+            void (async () => {
+              setPlayerId(linkedPlayerId);
+              setGoogleLinkedProfile(linkedGoogle);
+              await upsertProfile();
+              await submitPendingScoreIfAny();
+              window.location.href = redirectPath;
+            })();
           })
           .catch(() => setMessage('Google sign-in failed.'))
           .finally(() => setGoogleBusy(false));
@@ -158,15 +194,15 @@ export default function SignInPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden px-4 py-8 md:py-12">
+    <main className="relative min-h-screen px-4 py-6 md:py-12">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_15%,rgba(34,197,94,0.2),transparent_32%),radial-gradient(circle_at_90%_12%,rgba(59,130,246,0.18),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(251,146,60,0.22),transparent_35%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.08)_1px,transparent_1px)] bg-[size:28px_28px]" />
       </div>
 
-      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
+      <div className="relative mx-auto flex min-h-[calc(100svh-3rem)] md:min-h-[calc(100svh-4rem)] max-w-6xl items-center justify-center">
         <div className="grid w-full grid-cols-1 overflow-hidden rounded-[2rem] border border-[#d6e0ef] bg-white/80 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur md:grid-cols-[1.05fr_0.95fr]">
-          <section className="relative border-b border-[#d6e0ef] bg-[#0f2748] p-8 text-white md:border-b-0 md:border-r md:p-10">
+          <section className="relative border-b border-[#d6e0ef] bg-[#0f2748] p-6 md:p-10 text-white md:border-b-0 md:border-r">
             <div className="absolute -left-24 -top-16 h-72 w-72 rounded-full bg-[#1f6feb]/35 blur-3xl" />
             <div className="absolute -bottom-20 right-0 h-72 w-72 rounded-full bg-[#2a9d8f]/30 blur-3xl" />
             <div className="relative space-y-7">
@@ -174,7 +210,7 @@ export default function SignInPage() {
                 <MapPinned size={14} />
                 Account Gateway
               </div>
-              <h1 className="text-4xl font-extrabold leading-tight md:text-5xl">
+              <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight md:text-5xl">
                 Enter GeoRush
                 <br />
                 From Any Route
@@ -194,7 +230,7 @@ export default function SignInPage() {
             </div>
           </section>
 
-          <section className="p-8 md:p-10">
+          <section className="p-6 md:p-10">
             <div className="mb-6 flex rounded-xl bg-[#eef3fb] p-1">
               <button
                 onClick={() => setMode('signup')}

@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { calculateAccuracy, calculateRank, getComparisonMessage } from '@/lib/gameLogic';
-import { getOrCreatePlayerIdentity } from '@/lib/playerId';
+import { savePendingScore } from '@/lib/pendingScore';
+import { getAuthSession, getOrCreatePlayerIdentity } from '@/lib/playerId';
 
 interface ResultsCardProps {
   gameMode: string;
@@ -34,6 +35,7 @@ export function ResultsCard({
   const [liveScore, setLiveScore] = useState<number>(score);
   const [liveStreak, setLiveStreak] = useState<number | null>(null);
   const [liveBadges, setLiveBadges] = useState<number | null>(null);
+  const [showGuestSavePrompt, setShowGuestSavePrompt] = useState(false);
   const submittedRef = useRef<string | null>(null);
 
   const fallbackRank = calculateRank(score);
@@ -53,13 +55,22 @@ export function ResultsCard({
     badges: String(liveBadges ?? 0),
     date: dateKey,
   });
+  if (Array.isArray(countriesGuessed) && countriesGuessed.length > 0) {
+    shareParams.set('countries', JSON.stringify(countriesGuessed.slice(0, 240)));
+  }
   const shareUrl = `/api/share?${shareParams.toString()}`;
 
   useEffect(() => {
     const signature = `${gameMode}|${score}|${correct}|${total}|${dateKey}`;
     if (submittedRef.current === signature) return;
-    submittedRef.current = signature;
+    const session = getAuthSession();
+    if (!session.isAuthenticated) {
+      setShowGuestSavePrompt(true);
+      return;
+    }
 
+    setShowGuestSavePrompt(false);
+    submittedRef.current = signature;
     const { playerId, playerName } = getOrCreatePlayerIdentity();
     void fetch('/api/leaderboard', {
       method: 'POST',
@@ -112,6 +123,20 @@ export function ResultsCard({
       .catch(() => undefined);
   }, [correct, countriesGuessed, dateKey, durationSeconds, gameMode, score, timeRemainingSeconds, timeSpentSeconds, total]);
 
+  const handleSignInToSave = () => {
+    savePendingScore({
+      gameMode,
+      score,
+      correct,
+      total,
+      durationSeconds,
+      timeRemainingSeconds,
+      timeSpentSeconds,
+      countriesGuessed,
+    });
+    window.location.href = '/signin?next=/profile&saveScore=1';
+  };
+
   const handleDownload = async () => {
     try {
       const response = await fetch(shareUrl);
@@ -137,20 +162,20 @@ export function ResultsCard({
   };
 
   return (
-    <div className="neon-card p-8 max-w-md w-full space-y-6">
+    <div className="neon-card p-5 md:p-8 max-w-md w-full space-y-5 md:space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold gradient-text">Game Over!</h1>
+        <h1 className="text-3xl md:text-4xl font-bold gradient-text">Game Over!</h1>
         <p className="text-[#5a6b7a]">{gameMode}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-[#ffffff] rounded-lg p-4 text-center border border-[#2a9d8f] border-opacity-30">
           <p className="text-[#9aa6b2] text-sm mb-2">Countries Named</p>
-          <p className="text-3xl font-bold text-[#2a9d8f]">{correct}</p>
+          <p className="text-2xl md:text-3xl font-bold text-[#2a9d8f]">{correct}</p>
         </div>
         <div className="bg-[#ffffff] rounded-lg p-4 text-center border border-[#1f6feb] border-opacity-30">
           <p className="text-[#9aa6b2] text-sm mb-2">Score</p>
-          <p className="text-3xl font-bold text-[#1f6feb]">{liveScore}</p>
+          <p className="text-2xl md:text-3xl font-bold text-[#1f6feb]">{liveScore}</p>
         </div>
       </div>
 
@@ -166,6 +191,22 @@ export function ResultsCard({
         {liveStreak !== null && <p className="text-[#5a6b7a] text-sm mt-1">Current streak: {liveStreak} day(s)</p>}
         {liveBadges !== null && <p className="text-[#5a6b7a] text-sm mt-1">Badges earned: {liveBadges}</p>}
       </div>
+
+      {showGuestSavePrompt && (
+        <div className="bg-[#eff6ff] rounded-lg p-4 border border-[#93c5fd] border-opacity-70 space-y-3">
+          <p className="text-sm text-[#1f2937]">
+            You played as a guest. Sign in to save this score to the leaderboard.
+          </p>
+          <div className="grid grid-cols-1 gap-2">
+            <button onClick={handleSignInToSave} className="neon-btn-primary w-full py-2.5">
+              Sign In to Save Score
+            </button>
+            <button onClick={() => setShowGuestSavePrompt(false)} className="neon-btn w-full py-2.5">
+              Not Now
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="neon-card p-4 text-center">
         <p className="text-lg font-bold text-[#1f2937] mb-2">Beat your high score?</p>

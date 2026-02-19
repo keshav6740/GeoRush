@@ -240,11 +240,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-12">
+    <main className="min-h-screen px-4 py-8 md:py-12">
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="rounded-2xl overflow-hidden border border-[#d8e0eb] bg-white shadow-sm">
           <div className="h-32 bg-gradient-to-r from-[#d4f1f4] via-[#fef6e4] to-[#fde2e4]" />
-          <div className="px-6 pb-6 pt-0">
+          <div className="px-4 md:px-6 pb-5 md:pb-6 pt-0">
             <div className="flex flex-wrap items-end justify-between gap-4 -mt-10">
               <div className="flex items-end gap-4">
                 <div className="relative group">
@@ -261,7 +261,7 @@ export default function ProfilePage() {
                   )}
                   <button
                     onClick={() => setIsEditOpen(true)}
-                    className="absolute -top-1 -left-1 h-8 w-8 rounded-full bg-[#1f2937] text-white grid place-items-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-1 -left-1 h-8 w-8 rounded-full bg-[#1f2937] text-white grid place-items-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                     aria-label="Edit profile"
                     title="Edit profile"
                   >
@@ -269,7 +269,7 @@ export default function ProfilePage() {
                   </button>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-[#1f2937]">{profile.name}</h1>
+                  <h1 className="text-2xl md:text-3xl font-bold text-[#1f2937] break-words">{profile.name}</h1>
                   <p className="text-[#5a6b7a] text-sm">
                     {profile.authProvider === 'google'
                       ? 'Google linked account'
@@ -279,14 +279,17 @@ export default function ProfilePage() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button onClick={handleLogout} className="neon-btn px-4 py-2">
+              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                <Link href="/" className="neon-btn px-4 py-2 flex-1 sm:flex-none text-center">
+                  Home
+                </Link>
+                <button onClick={handleLogout} className="neon-btn px-4 py-2 flex-1 sm:flex-none">
                   Logout
                 </button>
-                <Link href="/leaderboard" className="neon-btn px-4 py-2">
+                <Link href="/leaderboard" className="neon-btn px-4 py-2 flex-1 sm:flex-none text-center">
                   Leaderboard
                 </Link>
-                <Link href="/modes" className="neon-btn-primary px-4 py-2">
+                <Link href="/modes" className="neon-btn-primary px-4 py-2 flex-1 sm:flex-none text-center">
                   Play
                 </Link>
               </div>
@@ -325,7 +328,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="neon-card p-6">
+        <div className="neon-card p-4 md:p-6">
           <h2 className="text-xl font-bold text-[#1f2937] mb-3">365-Day Streak Heatmap</h2>
           <div className="grid grid-cols-[repeat(53,minmax(0,1fr))] gap-1 overflow-x-auto pb-2">
             {heatmapDays.map((day) => (
@@ -339,7 +342,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="neon-card p-6 space-y-4">
+          <div className="neon-card p-4 md:p-6 space-y-4">
             <h2 className="text-xl font-bold text-[#1f2937]">Badge Gallery</h2>
             {profile.badges.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -354,7 +357,7 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <div className="neon-card p-6 space-y-4">
+          <div className="neon-card p-4 md:p-6 space-y-4">
             <h2 className="text-xl font-bold text-[#1f2937]">Mode Scores</h2>
             {modeScores.length > 0 ? (
               <div className="space-y-3">
@@ -379,7 +382,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="neon-card p-6 space-y-3">
+        <div className="neon-card p-4 md:p-6 space-y-3">
           <h2 className="text-xl font-bold text-[#1f2937]">Account Controls</h2>
           <p className="text-sm text-[#5a6b7a]">
             Use reset only if account state on this device becomes inconsistent.
@@ -396,7 +399,7 @@ export default function ProfilePage() {
 
       {isEditOpen && (
         <div className="fixed inset-0 z-50 bg-black/35 backdrop-blur-[2px] flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white rounded-2xl border border-[#d8e0eb] shadow-xl p-6 space-y-4">
+          <div className="w-full max-w-lg bg-white rounded-2xl border border-[#d8e0eb] shadow-xl p-4 md:p-6 space-y-4 max-h-[90svh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-[#1f2937]">Edit Profile</h2>
               <button

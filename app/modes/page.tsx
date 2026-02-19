@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Clock3,
   Compass,
+  Flag,
   Globe2,
   LandPlot,
   Route,
@@ -25,12 +26,21 @@ const MODE_ITEMS = [
   },
   {
     href: '/game/neighbour-chain',
-    title: 'Neighbour Chain',
-    subtitle: 'Border memory',
-    description: 'Build correct border chains and avoid one wrong step ending the run.',
+    title: 'Border Rush',
+    subtitle: 'One country, all neighbors',
+    description: 'Given a country, guess every bordering country without mistakes.',
     icon: Route,
     accent: '#2a9d8f',
     glow: 'shadow-[0_16px_45px_rgba(42,157,143,0.24)]',
+  },
+  {
+    href: '/game/travel-chain',
+    title: 'Travel Chain',
+    subtitle: 'Pathfinding challenge',
+    description: 'Travel from one country to another in as few border hops as possible. Includes Daily and Practice routes.',
+    icon: Compass,
+    accent: '#0ea5a8',
+    glow: 'shadow-[0_16px_45px_rgba(14,165,168,0.24)]',
   },
   {
     href: '/game/world-quiz',
@@ -64,9 +74,18 @@ const MODE_ITEMS = [
     title: 'Country to Capital',
     subtitle: 'Recall drill',
     description: 'Capitals-only mode to sharpen speed and precision memory.',
-    icon: Compass,
-    accent: '#0ea5a8',
-    glow: 'shadow-[0_16px_45px_rgba(14,165,168,0.24)]',
+    icon: LandPlot,
+    accent: '#3b82f6',
+    glow: 'shadow-[0_16px_45px_rgba(59,130,246,0.24)]',
+  },
+  {
+    href: '/game/flag-guess',
+    title: 'Flag Guess',
+    subtitle: 'Visual recall',
+    description: 'Identify countries by their flags under timed rounds.',
+    icon: Flag,
+    accent: '#0ea5e9',
+    glow: 'shadow-[0_16px_45px_rgba(14,165,233,0.24)]',
   },
   {
     href: '/duel',
@@ -96,7 +115,7 @@ export default function ModesPage() {
                 <Clock3 size={14} />
                 Select Your Mode
               </p>
-              <h1 className="text-5xl md:text-7xl font-black leading-[0.9] bg-gradient-to-r from-[#0f5bd8] via-[#17a06f] to-[#f18a3d] bg-clip-text text-transparent">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-[0.9] bg-gradient-to-r from-[#0f5bd8] via-[#17a06f] to-[#f18a3d] bg-clip-text text-transparent">
                 Pick Your Route
               </h1>
               <p className="text-lg text-[#516375] mt-4">

@@ -41,19 +41,19 @@ export default function DuelLobbyPage() {
   };
 
   return (
-    <main className="min-h-screen px-4 py-12">
+    <main className="min-h-screen px-4 py-8 md:py-12">
       <div className="mx-auto max-w-3xl space-y-6">
-        <section className="rounded-2xl border border-[#d7e3f5] bg-white p-8 text-center">
+        <section className="rounded-2xl border border-[#d7e3f5] bg-white p-5 md:p-8 text-center">
           <p className="inline-flex items-center gap-2 rounded-full border border-[#d7e3f5] px-4 py-1 text-xs uppercase tracking-[0.2em] text-[#5e7186]">
             <Swords size={14} /> 1v1 Duel
           </p>
-          <h1 className="mt-4 text-5xl font-black text-[#101f33]">Duel Lobby</h1>
+          <h1 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-black text-[#101f33]">Duel Lobby</h1>
           <p className="mt-2 text-[#5b6c80]">Create a room, invite your friend, ready up, pick mode, then play.</p>
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-[#d7e3f5] bg-white p-6 space-y-3">
-            <h2 className="text-2xl font-black text-[#13243a]">Create</h2>
+          <div className="rounded-2xl border border-[#d7e3f5] bg-white p-5 md:p-6 space-y-3">
+            <h2 className="text-xl md:text-2xl font-black text-[#13243a]">Create</h2>
             <p className="text-sm text-[#5b6c80]">You will choose game mode after both players are ready.</p>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -78,8 +78,8 @@ export default function DuelLobbyPage() {
             </button>
           </div>
 
-          <div className="rounded-2xl border border-[#d7e3f5] bg-white p-6 space-y-3">
-            <h2 className="text-2xl font-black text-[#13243a]">Join</h2>
+          <div className="rounded-2xl border border-[#d7e3f5] bg-white p-5 md:p-6 space-y-3">
+            <h2 className="text-xl md:text-2xl font-black text-[#13243a]">Join</h2>
             <label className="block text-sm text-[#5b6c80]">
               Room code or ID
               <div className="mt-2 relative">

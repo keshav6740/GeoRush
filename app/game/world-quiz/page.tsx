@@ -13,7 +13,7 @@ export default function WorldQuizPage() {
       durationSeconds={15 * 60}
       backHref="/modes"
       emphasizeMap
-      mapHeightClass="h-[460px] md:h-[780px]"
+      mapHeightClass="h-[52vh] md:h-[calc(100svh-220px)]"
       inputFirst
       showRecentGuesses={false}
     />
