@@ -56,7 +56,7 @@ export default function ZoomRevealPage() {
             <p className="text-[#5a6b7a]">Guess countries from zoomed map regions.</p>
             <div className="flex gap-2">
               <Link href="/game/zoom-reveal" className="neon-btn-primary px-5 py-2.5">Play Again</Link>
-              <Link href="/modes" className="neon-btn px-5 py-2.5">Back</Link>
+              <a href="/modes" className="neon-btn px-5 py-2.5">Back</a>
             </div>
           </div>
         </div>
@@ -93,4 +93,5 @@ export default function ZoomRevealPage() {
     </main>
   );
 }
+
 

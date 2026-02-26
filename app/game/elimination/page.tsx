@@ -53,7 +53,7 @@ export default function EliminationPage() {
           <button className="neon-btn-primary px-6 py-3" onClick={() => setStarted(true)}>
             Start Elimination
           </button>
-          <Link href="/modes" className="neon-btn px-6 py-3">Back to Modes</Link>
+          <a href="/modes" className="neon-btn px-6 py-3">Back to Modes</a>
         </div>
       </main>
     );
@@ -70,7 +70,7 @@ export default function EliminationPage() {
             <p className="text-[#1f2937] font-semibold">Final streak: {correct}</p>
             <div className="flex gap-2">
               <Link href="/game/elimination" className="neon-btn-primary px-5 py-2.5">Try Again</Link>
-              <Link href="/modes" className="neon-btn px-5 py-2.5">Back</Link>
+              <a href="/modes" className="neon-btn px-5 py-2.5">Back</a>
             </div>
           </div>
         </div>
@@ -99,4 +99,5 @@ export default function EliminationPage() {
     </main>
   );
 }
+
 

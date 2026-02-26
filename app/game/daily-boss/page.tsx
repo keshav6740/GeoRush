@@ -14,7 +14,7 @@ export default function DailyBossPage() {
         <div className="max-w-xl mx-auto neon-card p-8 text-center space-y-4">
           <h1 className="text-4xl font-bold gradient-text">Daily Boss</h1>
           <p className="text-[#5a6b7a]">Daily boss challenge is unavailable right now.</p>
-          <Link href="/modes" className="neon-btn px-6 py-3">Back to Modes</Link>
+          <a href="/modes" className="neon-btn px-6 py-3">Back to Modes</a>
         </div>
       </main>
     );
@@ -34,4 +34,5 @@ export default function DailyBossPage() {
     />
   );
 }
+
 

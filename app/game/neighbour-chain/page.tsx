@@ -135,9 +135,9 @@ export default function NeighbourChainPage() {
           >
             Start Game
           </button>
-          <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
+          <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
             Back to Modes
-          </Link>
+          </a>
         </div>
       </main>
     );
@@ -249,9 +249,9 @@ export default function NeighbourChainPage() {
               >
                 Play Again
               </button>
-              <Link href="/modes" className="neon-btn w-full text-center block py-3">
+              <a href="/modes" className="neon-btn w-full text-center block py-3">
                 View Modes
-              </Link>
+              </a>
               <Link href="/game/daily" className="neon-btn w-full text-center block py-3">
                 Play Daily Challenge
               </Link>
@@ -326,3 +326,4 @@ export default function NeighbourChainPage() {
     </main>
   );
 }
+

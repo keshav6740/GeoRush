@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { ResultsCard } from '@/components/results/ResultsCard';
 import { WorldGuessMap } from '@/components/results/WorldGuessMap';
 import { buildCountryLookup, resolveGuessToCountry } from '@/lib/countryNameUtils';
@@ -160,9 +159,9 @@ export function SporcleCountryQuiz({
               Back
             </button>
           ) : (
-            <Link href={backHref} className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
+            <a href={backHref} className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
               Back
-            </Link>
+            </a>
           )}
         </div>
       </main>
@@ -254,9 +253,9 @@ export function SporcleCountryQuiz({
                 Back
               </button>
             ) : (
-              <Link href={backHref} className="neon-btn px-6 py-3">
+              <a href={backHref} className="neon-btn px-6 py-3">
                 Back
-              </Link>
+              </a>
             )}
           </div>
         </div>

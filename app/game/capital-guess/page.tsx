@@ -194,9 +194,9 @@ export default function CapitalGuessPage() {
           >
             Start Challenge
           </button>
-          <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
+          <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
             Back to Modes
-          </Link>
+          </a>
         </div>
       </main>
     );
@@ -260,9 +260,9 @@ export default function CapitalGuessPage() {
               </div>
             </div>
             <div className="text-center mt-6">
-              <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
+              <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
                 Back to Modes
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -340,3 +340,4 @@ export default function CapitalGuessPage() {
     </main>
   );
 }
+

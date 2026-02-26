@@ -108,11 +108,12 @@ export default function ImpossibleModePage() {
         </div>
 
         <div className="text-center">
-          <Link href="/modes" className="neon-btn px-6 py-3">
+          <a href="/modes" className="neon-btn px-6 py-3">
             Back to Modes
-          </Link>
+          </a>
         </div>
       </div>
     </main>
   );
 }
+

@@ -276,9 +276,9 @@ export function ResultsCard({
       </div>
 
       <div className="space-y-2 pt-4">
-        <Link href="/modes" className="neon-btn-primary w-full text-center block py-3">
+        <a href="/modes" className="neon-btn-primary w-full text-center block py-3">
           Play Again
-        </Link>
+        </a>
         <Link href="/leaderboard" className="neon-btn w-full text-center block py-3">
           View Leaderboard
         </Link>
@@ -310,3 +310,4 @@ export function ResultsCard({
     </div>
   );
 }
+

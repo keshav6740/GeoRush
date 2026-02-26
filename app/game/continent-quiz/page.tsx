@@ -181,11 +181,12 @@ export default function ContinentQuizPage() {
         </div>
 
         <div className="text-center mt-10">
-          <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
+          <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
             Back to Modes
-          </Link>
+          </a>
         </div>
       </div>
     </main>
   );
 }
+

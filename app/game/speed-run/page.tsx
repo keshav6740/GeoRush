@@ -81,9 +81,9 @@ export default function SpeedRunPage() {
             <WorldGuessMap guessedCountries={displayedAnswers} title="World Map Highlights" />
           </div>
           <div className="text-center">
-            <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
+            <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
               Back to Modes
-            </Link>
+            </a>
           </div>
         </div>
       </main>
@@ -160,3 +160,4 @@ export default function SpeedRunPage() {
     </main>
   );
 }
+

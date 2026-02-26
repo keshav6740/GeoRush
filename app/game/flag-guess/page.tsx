@@ -217,9 +217,9 @@ export default function FlagGuessPage() {
           <button onClick={handleStartGame} className="neon-btn-primary w-full py-3 text-lg" disabled={flagsLoading}>
             {flagsLoading ? 'Loading Flags...' : 'Start Challenge'}
           </button>
-          <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
+          <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
             Back to Modes
-          </Link>
+          </a>
         </div>
       </main>
     );
@@ -350,3 +350,4 @@ export default function FlagGuessPage() {
     </main>
   );
 }
+

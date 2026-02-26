@@ -130,9 +130,9 @@ export default function DailyChallengePage() {
           >
             Start Daily
           </button>
-          <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
+          <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
             Back to Modes
-          </Link>
+          </a>
         </div>
       </main>
     );
@@ -233,3 +233,4 @@ export default function DailyChallengePage() {
     </main>
   );
 }
+

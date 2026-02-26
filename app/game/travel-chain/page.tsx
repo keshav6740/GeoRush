@@ -181,9 +181,9 @@ export default function TravelChainPage() {
                 Start Practice Chain
               </button>
             </div>
-            <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
+            <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
               Back to Modes
-            </Link>
+            </a>
           </div>
         </div>
       </main>
@@ -270,9 +270,9 @@ export default function TravelChainPage() {
             <button onClick={() => startChallenge(mode, true)} className="neon-btn px-6 py-3">
               Try Again
             </button>
-            <Link href="/modes" className="neon-btn px-6 py-3 inline-block">
+            <a href="/modes" className="neon-btn px-6 py-3 inline-block">
               Back to Modes
-            </Link>
+            </a>
           </div>
         </div>
       </main>
@@ -401,9 +401,9 @@ export default function TravelChainPage() {
               <button onClick={() => startChallenge(mode, true)} className="neon-btn w-full py-2.5">
                 Reset Route
               </button>
-              <Link href="/modes" className="neon-btn w-full py-2.5 text-center inline-block">
+              <a href="/modes" className="neon-btn w-full py-2.5 text-center inline-block">
                 Back
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -411,3 +411,4 @@ export default function TravelChainPage() {
     </main>
   );
 }
+

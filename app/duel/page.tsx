@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useState } from 'react';
@@ -99,9 +99,10 @@ export default function DuelLobbyPage() {
         {error && <p className="text-sm text-[#d14343]">{error}</p>}
 
         <div>
-          <Link href="/modes" className="text-sm font-semibold text-[#3c4f66] hover:text-[#1f6feb]">Back to Modes</Link>
+          <a href="/modes" className="text-sm font-semibold text-[#3c4f66] hover:text-[#1f6feb]">Back to Modes</a>
         </div>
       </div>
     </main>
   );
 }
+

@@ -84,7 +84,7 @@ export default function ChaosModePage() {
           <button className="neon-btn-primary px-6 py-3" onClick={() => setStarted(true)}>
             Start Chaos
           </button>
-          <Link href="/modes" className="neon-btn px-6 py-3">Back to Modes</Link>
+          <a href="/modes" className="neon-btn px-6 py-3">Back to Modes</a>
         </div>
       </main>
     );
@@ -102,7 +102,7 @@ export default function ChaosModePage() {
             <p className="text-[#5a6b7a]">Wrong: {wrong}</p>
             <div className="flex gap-2">
               <Link href="/game/chaos-mode" className="neon-btn-primary px-5 py-2.5">Play Again</Link>
-              <Link href="/modes" className="neon-btn px-5 py-2.5">Back</Link>
+              <a href="/modes" className="neon-btn px-5 py-2.5">Back</a>
             </div>
           </div>
         </div>
@@ -131,4 +131,5 @@ export default function ChaosModePage() {
     </main>
   );
 }
+
 
