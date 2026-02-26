@@ -70,6 +70,10 @@ const GUESS_ALIASES_TO_LOCAL: Record<string, string> = {
   'st. kitts and nevis': 'Saint Kitts and Nevis',
   'st vincent and the grenadines': 'Saint Vincent and the Grenadines',
   'st. vincent and the grenadines': 'Saint Vincent and the Grenadines',
+  uae: 'United Arab Emirates',
+  'u a e': 'United Arab Emirates',
+  car: 'Central African Republic',
+  'c a r': 'Central African Republic',
 };
 
 export function toWorldMapCountryName(localCountryName: string): string {
@@ -109,6 +113,8 @@ const WORLD_NAME_VARIANTS: Record<string, string[]> = {
     'St. Vincent and the Grenadines',
   ],
   Kosovo: ['Kosovo', 'Republic of Kosovo'],
+  'United Arab Emirates': ['United Arab Emirates', 'UAE', 'U.A.E.'],
+  'Central African Republic': ['Central African Republic', 'CAR', 'C.A.R.'],
 };
 
 export function toWorldMapCountryNameVariants(localCountryName: string): string[] {
