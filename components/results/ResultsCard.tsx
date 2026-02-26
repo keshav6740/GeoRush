@@ -235,14 +235,14 @@ export function ResultsCard({
       </div>
 
       <div className="bg-[#ffffff] rounded-lg p-4 text-center border border-[#f4a261] border-opacity-30">
-        <p className="text-[#9aa6b2] text-sm mb-2">Daily Rank</p>
-        <p className="text-2xl font-bold text-[#f4a261]">#{rank}</p>
+        <p className="text-[#9aa6b2] text-sm mb-2">Mode Rank</p>
+        <p className="text-2xl font-bold text-[#f4a261]">{rank ? `#${rank}` : '--'}</p>
         {xpAward !== null && <p className="text-xs text-[#5a6b7a] mt-1">XP gained: +{xpAward}</p>}
       </div>
 
       <div className="bg-[#fef6e4] rounded-lg p-4 text-center border border-[#8b5cf6] border-opacity-30">
         <p className="text-[#8b5cf6] font-semibold">{comparisonMessage}</p>
-        <p className="text-[#5a6b7a] text-sm mt-1">You're better than {betterThanPercentage}% of players today!</p>
+        <p className="text-[#5a6b7a] text-sm mt-1">You're better than {betterThanPercentage}% of players in this mode.</p>
         <p className="text-[#5a6b7a] text-sm mt-1">Accuracy: {accuracy}%</p>
         {liveStreak !== null && <p className="text-[#5a6b7a] text-sm mt-1">Current streak: {liveStreak} day(s)</p>}
         {reachedMilestone && (
