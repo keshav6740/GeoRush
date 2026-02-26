@@ -48,7 +48,8 @@ export async function POST(request: Request) {
       },
     });
     return NextResponse.json({ room });
-  } catch {
-    return NextResponse.json({ error: 'Failed to create room' }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to create room';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

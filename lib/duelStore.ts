@@ -601,7 +601,7 @@ export async function createDuelRoom(input: {
 
     if (!error) return sanitizeRoomForClient(room, safePlayerId);
     if (!String(error.message).toLowerCase().includes('duplicate') || i === 3) {
-      throw new Error('Failed to create room');
+      throw new Error(`Failed to create room: ${error.message}`);
     }
     room.code = randomToken(6);
   }

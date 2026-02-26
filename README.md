@@ -73,13 +73,29 @@ npm run start
 
 ## Environment
 
-Create `.env.local` if needed for auth-related features.
+Create `.env.local` for auth and duel room features.
 
-Example:
+Required for duel rooms:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+Optional fallback keys (if you are using permissive RLS policies):
+
+```env
+SUPABASE_ANON_KEY=your_anon_key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
+
+Optional auth key:
 
 ```env
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 ```
+
+After setting env vars, run `supabase/duel_rooms.sql` in your Supabase SQL editor so the `duel_rooms` table and policies exist.
 
 ## Scripts
 
@@ -97,4 +113,3 @@ Pushing to GitHub triggers auto-redeploy when connected in Vercel.
 
 - Build currently passes successfully on the latest pushed state.
 - Some gameplay/profile data is backed by local JSON and in-app APIs.
-
