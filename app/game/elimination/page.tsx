@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { resolveGuessToCountry, buildCountryLookup } from '@/lib/countryNameUtils';
-import { COUNTRY_NAMES } from '@/lib/countries';
+import { normalizeText, COUNTRY_NAMES } from '@/lib/countries';
+import { WorldGuessMap } from '@/components/results/WorldGuessMap';
 import { ResultsCard } from '@/components/results/ResultsCard';
 
 function shuffle<T>(items: T[]) {
@@ -23,14 +23,15 @@ export default function EliminationPage() {
   const [input, setInput] = useState('');
   const [correct, setCorrect] = useState(0);
   const [status, setStatus] = useState<string | null>(null);
-  const lookup = useMemo(() => buildCountryLookup(COUNTRY_NAMES), []);
 
   const prompt = pool[idx];
+  const exactPrompt = useMemo(() => (prompt ? normalizeText(prompt) : ''), [prompt]);
 
-  const onSubmit = () => {
+  const onSubmit = (event?: React.FormEvent) => {
+    event?.preventDefault();
     if (!prompt || finished) return;
-    const resolved = resolveGuessToCountry(input, lookup);
-    if (resolved === prompt) {
+    const exactInput = normalizeText(input);
+    if (exactInput === exactPrompt) {
       setCorrect((prev) => prev + 1);
       setIdx((prev) => prev + 1);
       setInput('');
@@ -80,21 +81,38 @@ export default function EliminationPage() {
 
   return (
     <main className="min-h-screen px-4 py-10">
-      <div className="max-w-xl mx-auto neon-card p-8 space-y-4">
-        <h1 className="text-3xl font-bold text-[#1f2937]">Elimination Mode</h1>
-        <p className="text-sm text-[#5a6b7a]">Prompt {idx + 1}/100</p>
-        <div className="rounded-xl border border-[#d8e0eb] bg-white p-4">
-          <p className="text-sm text-[#5a6b7a]">Type this country exactly:</p>
-          <p className="text-2xl font-black text-[#1f6feb] mt-1">{prompt}</p>
+      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="space-y-4">
+          <div className="neon-card p-5">
+            <h1 className="text-3xl font-bold text-[#1f2937]">Elimination Mode</h1>
+            <p className="text-sm text-[#5a6b7a] mt-1">Prompt {idx + 1}/100</p>
+            <p className="text-sm text-[#5a6b7a] mt-2">Guess the highlighted country exactly by name. One mistake ends the run.</p>
+          </div>
+          <WorldGuessMap
+            guessedCountries={[]}
+            focusCountries={prompt ? [prompt] : []}
+            title="Country Outline Prompt"
+            mapHeightClass="h-[320px] md:h-[520px]"
+            cropToFocus
+            hideNonScopeCountries={false}
+          />
         </div>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type country..."
-          className="w-full rounded-xl border border-[#d8e0eb] px-4 py-3"
-        />
-        <button onClick={onSubmit} className="neon-btn-primary w-full py-3">Submit</button>
-        {status && <p className="text-sm text-[#5a6b7a]">{status}</p>}
+        <div className="neon-card p-8 space-y-4">
+          <p className="text-sm text-[#5a6b7a]">Type this country exactly:</p>
+          <form onSubmit={onSubmit} className="space-y-3">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type country name..."
+              className="w-full rounded-xl border border-[#d8e0eb] px-4 py-3"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            <button type="submit" className="neon-btn-primary w-full py-3">Submit</button>
+          </form>
+          <p className="text-sm text-[#5a6b7a]">Exact mode: abbreviations/aliases are not accepted here.</p>
+          {status && <p className="text-sm text-[#5a6b7a]">{status}</p>}
+        </div>
       </div>
     </main>
   );
