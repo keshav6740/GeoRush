@@ -102,12 +102,19 @@ function randomToken(length: number) {
   return out;
 }
 
+function isConflictError(message: string) {
+  const normalized = message.toLowerCase();
+  return normalized.includes('conflict');
+}
+
 export default function DuelRoomPage() {
   const params = useParams<{ roomId: string }>();
   const searchParams = useSearchParams();
   const roomId = decodeURIComponent(params.roomId ?? '');
   const isSpectator = searchParams.get('spectate') === '1';
   const isInviteJoin = searchParams.get('invite') === '1';
+  const cleanMode = searchParams.get('clean') === '1';
+  const darkTheme = searchParams.get('theme') === 'dark';
 
   const [room, setRoom] = useState<DuelRoomView | null>(null);
   const [answer, setAnswer] = useState('');
@@ -297,6 +304,18 @@ export default function DuelRoomPage() {
     }
   };
 
+  const handleCopySpectatorLink = async () => {
+    const url = `${window.location.origin}/duel/${roomId}?spectate=1&clean=1&theme=dark`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setFlash('Spectator link copied');
+      setTimeout(() => setFlash(null), 1000);
+    } catch {
+      setFlash('Copy failed');
+      setTimeout(() => setFlash(null), 1000);
+    }
+  };
+
   const handleReady = async (ready: boolean) => {
     if (!room || isSpectator) return;
     const response = await fetch('/api/duel/ready', {
@@ -339,27 +358,43 @@ export default function DuelRoomPage() {
   };
 
   const submitAnswerValue = async (value: string, questionIndex?: number) => {
-    if (!room || !value.trim() || isSpectator) return;
+    if (!room || !value.trim() || isSpectator) return false;
     setSubmitting(true);
     setError(null);
     try {
-      const response = await fetch('/api/duel/answer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomId: room.id,
-          playerId: tabPlayerId,
-          questionIndex,
-          answer: value,
-        }),
-      });
-      const payload = (await response.json()) as { room?: DuelRoomView; result?: { correct: boolean }; error?: string };
-      if (!response.ok || !payload.room) throw new Error(payload.error || 'Submit failed');
-      setRoom(payload.room);
-      setFlash(payload.result?.correct ? 'Correct +100' : 'Wrong');
-      setTimeout(() => setFlash(null), 900);
+      const maxAttempts = 3;
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const response = await fetch('/api/duel/answer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomId: room.id,
+            playerId: tabPlayerId,
+            questionIndex,
+            answer: value,
+          }),
+        });
+        const payload = (await response.json()) as { room?: DuelRoomView; result?: { correct: boolean }; error?: string };
+        if (response.ok && payload.room) {
+          setRoom(payload.room);
+          setFlash(payload.result?.correct ? 'Correct +100' : 'Wrong');
+          setTimeout(() => setFlash(null), 900);
+          return true;
+        }
+
+        const message = payload.error || 'Submit failed';
+        const shouldRetry = isConflictError(message) && attempt < maxAttempts - 1;
+        if (shouldRetry) {
+          await new Promise((resolve) => setTimeout(resolve, 80 + attempt * 80));
+          continue;
+        }
+
+        throw new Error(message);
+      }
+      return false;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Submit failed');
+      return false;
     } finally {
       setSubmitting(false);
     }
@@ -367,8 +402,9 @@ export default function DuelRoomPage() {
 
   const handleSubmitAnswer = async () => {
     if (isCountryFillMode) return;
-    await submitAnswerValue(answer, currentQuestion?.idx);
-    setAnswer('');
+    const typedValue = answer;
+    const ok = await submitAnswerValue(typedValue, currentQuestion?.idx);
+    if (ok) setAnswer('');
   };
 
   const handleCountryFillInput = (nextValue: string) => {
@@ -378,8 +414,11 @@ export default function DuelRoomPage() {
     const resolved = resolveGuessToCountry(nextValue, countryLookup);
     if (!resolved) return;
     if (guessedSet.has(resolved)) return;
-    void submitAnswerValue(nextValue, undefined);
+    const typedValue = nextValue;
     setAnswer('');
+    void submitAnswerValue(typedValue, undefined).then((ok) => {
+      if (!ok) setAnswer(typedValue);
+    });
   };
 
   const handleCreateRematch = async () => {
@@ -418,9 +457,10 @@ export default function DuelRoomPage() {
   if (!room) return null;
 
   return (
-    <main className="min-h-screen px-4 py-6 md:py-8">
+    <main className={`${darkTheme ? 'bg-[#0b1220] text-white' : ''} min-h-screen px-4 py-6 md:py-8`}>
       <div className="mx-auto max-w-6xl space-y-4">
-        <section className="rounded-2xl border border-[#d7e3f5] bg-white p-5">
+        {!cleanMode && (
+        <section className={`rounded-2xl border ${darkTheme ? 'border-[#22324b] bg-[#101a2b]' : 'border-[#d7e3f5] bg-white'} p-5`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[#6c7d93]">1v1 Duel</p>
@@ -429,11 +469,13 @@ export default function DuelRoomPage() {
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
               <button onClick={handleCopyLink} className="neon-btn px-4 py-2 text-sm flex-1 sm:flex-none"><Copy size={14} className="mr-1" />Invite</button>
+              <button onClick={handleCopySpectatorLink} className="neon-btn px-4 py-2 text-sm flex-1 sm:flex-none">Spectate</button>
               <Link href="/duel" className="neon-btn px-4 py-2 text-sm flex-1 sm:flex-none text-center">Lobby</Link>
             </div>
           </div>
           {flash && <p className="mt-2 text-sm text-[#1f6feb]">{flash}</p>}
         </section>
+        )}
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {room.players.map((player) => (
@@ -496,8 +538,9 @@ export default function DuelRoomPage() {
         )}
 
         {room.status === 'active' && (
-          <section className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-4">
+          <section className={`grid grid-cols-1 ${cleanMode ? '' : 'xl:grid-cols-[1.2fr_0.8fr]'} gap-4`}>
             <WorldGuessMap guessedCountries={guessedCountries} focusCountries={focusCountries} focusRegion={room.focusRegion} title="Live Duel Map" mapHeightClass="h-[320px] sm:h-[360px] md:h-[620px]" />
+            {!cleanMode && (
             <div className="rounded-2xl border border-[#d7e3f5] bg-white p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-[#5a6b7a]">{isCountryFillMode ? `Guessed ${guessedCountries.length}/${room.targetCountries.length}` : `Question ${Math.min(currentQuestionIdx + 1, room.rounds)}/${room.rounds}`}</p>
@@ -537,6 +580,7 @@ export default function DuelRoomPage() {
                 <p className="text-[#5a6b7a]">You finished all answers. Waiting for timer/opponent.</p>
               )}
             </div>
+            )}
           </section>
         )}
 

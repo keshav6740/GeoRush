@@ -65,6 +65,7 @@ interface DuelRoomRow {
 }
 
 const ROOM_TTL_MS = 1000 * 60 * 60 * 24;
+const ROOM_MUTATION_MAX_RETRIES = 8;
 const TABLE = 'duel_rooms';
 const COUNTRY_NAME_SET = new Set(COUNTRIES.map((item) => item.name));
 
@@ -79,6 +80,10 @@ function randomToken(length: number) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function toSafeName(name: string) {
@@ -385,7 +390,7 @@ async function saveRoom(room: DuelRoom, expectedUpdatedAt?: string | null) {
 async function mutateRoom<T>(roomRef: string, task: (room: DuelRoom) => Promise<T> | T): Promise<T> {
   await cleanupExpiredRooms();
 
-  for (let i = 0; i < 4; i += 1) {
+  for (let i = 0; i < ROOM_MUTATION_MAX_RETRIES; i += 1) {
     const row = await fetchRoomByRef(roomRef);
     if (!row?.payload) throw new Error('Room not found');
 
@@ -398,7 +403,8 @@ async function mutateRoom<T>(roomRef: string, task: (room: DuelRoom) => Promise<
       await saveRoom(room, row.updated_at);
       return result;
     } catch (error) {
-      if (error instanceof Error && error.message === 'CONFLICT_RETRY' && i < 3) {
+      if (error instanceof Error && error.message === 'CONFLICT_RETRY' && i < ROOM_MUTATION_MAX_RETRIES - 1) {
+        await sleep(20 + Math.floor(Math.random() * 60));
         continue;
       }
       throw error;
