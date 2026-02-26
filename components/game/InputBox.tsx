@@ -21,6 +21,15 @@ export function InputBox({ onSubmit, placeholder = 'Type a country...', disabled
       const suggestions = getAutocomplete(value);
       setSuggestions(suggestions);
       setShowSuggestions(true);
+
+      const typed = value.trim().toLowerCase();
+      const exactSuggestion = suggestions.find((item) => item.toLowerCase() === typed);
+      if (exactSuggestion && onSubmit(exactSuggestion)) {
+        setInput('');
+        setSuggestions([]);
+        setShowSuggestions(false);
+        inputRef.current?.focus();
+      }
     } else {
       setSuggestions([]);
       setShowSuggestions(false);

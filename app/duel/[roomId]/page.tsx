@@ -557,6 +557,16 @@ export default function DuelRoomPage() {
                       <input
                         value={answer}
                         onChange={(event) => handleCountryFillInput(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key !== 'Enter') return;
+                          event.preventDefault();
+                          const typedValue = answer;
+                          if (!typedValue.trim()) return;
+                          setAnswer('');
+                          void submitAnswerValue(typedValue, undefined).then((ok) => {
+                            if (!ok) setAnswer(typedValue);
+                          });
+                        }}
                         className="w-full rounded-xl border border-[#d7e3f5] px-4 py-3 outline-none focus:border-[#1f6feb]"
                         placeholder="Type country name..."
                       />
@@ -571,7 +581,17 @@ export default function DuelRoomPage() {
                   </div>
                   {!isSpectator && (
                     <div className="space-y-2">
-                      <input value={answer} onChange={(event) => setAnswer(event.target.value)} className="w-full rounded-xl border border-[#d7e3f5] px-4 py-3 outline-none focus:border-[#1f6feb]" placeholder="Type answer..." />
+                      <input
+                        value={answer}
+                        onChange={(event) => setAnswer(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key !== 'Enter') return;
+                          event.preventDefault();
+                          void handleSubmitAnswer();
+                        }}
+                        className="w-full rounded-xl border border-[#d7e3f5] px-4 py-3 outline-none focus:border-[#1f6feb]"
+                        placeholder="Type answer..."
+                      />
                       <button onClick={handleSubmitAnswer} disabled={submitting} className="neon-btn-primary w-full py-3">{submitting ? 'Submitting...' : 'Submit'}</button>
                     </div>
                   )}

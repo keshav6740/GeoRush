@@ -32,9 +32,9 @@ export default function ZoomRevealPage() {
     return [target, ...getNeighbors(target)];
   }, [target]);
 
-  const submit = () => {
+  const submit = (rawValue?: string) => {
     if (!target || finished) return;
-    const resolved = resolveGuessToCountry(answer, lookup);
+    const resolved = resolveGuessToCountry(rawValue ?? answer, lookup);
     const isCorrect = resolved === target;
     if (isCorrect) setCorrect((p) => p + 1);
     setFeedback(isCorrect ? 'Correct' : `Not quite. It was ${target}`);
@@ -44,6 +44,14 @@ export default function ZoomRevealPage() {
       if (idx + 1 >= rounds) setFinished(true);
       else setIdx((p) => p + 1);
     }, 700);
+  };
+
+  const handleInputChange = (nextValue: string) => {
+    setAnswer(nextValue);
+    const resolved = resolveGuessToCountry(nextValue, lookup);
+    if (resolved === target) {
+      submit(nextValue);
+    }
   };
 
   if (finished) {
@@ -80,13 +88,21 @@ export default function ZoomRevealPage() {
           enableZoomPan
         />
         <div className="neon-card p-4 space-y-2">
-          <input
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder="Type country..."
-            className="w-full rounded-xl border border-[#d8e0eb] px-4 py-3"
-          />
-          <button onClick={submit} className="neon-btn-primary w-full py-3">Submit Guess</button>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              submit();
+            }}
+            className="space-y-2"
+          >
+            <input
+              value={answer}
+              onChange={(e) => handleInputChange(e.target.value)}
+              placeholder="Type country..."
+              className="w-full rounded-xl border border-[#d8e0eb] px-4 py-3"
+            />
+            <button type="submit" className="neon-btn-primary w-full py-3">Submit Guess</button>
+          </form>
           {feedback && <p className="text-sm text-[#5a6b7a]">{feedback}</p>}
         </div>
       </div>

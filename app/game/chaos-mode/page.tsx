@@ -56,9 +56,9 @@ export default function ChaosModePage() {
     return () => clearInterval(timer);
   }, [started, finished]);
 
-  const submit = () => {
+  const submit = (rawValue?: string) => {
     if (!started || finished) return;
-    const resolved = resolveGuessToCountry(input, lookup);
+    const resolved = resolveGuessToCountry(rawValue ?? input, lookup);
     if (!resolved) {
       setWrong((v) => v + 1);
       setInput('');
@@ -73,6 +73,15 @@ export default function ChaosModePage() {
       setCorrectSet((prev) => new Set(prev).add(resolved));
     }
     setInput('');
+  };
+
+  const handleInputChange = (nextValue: string) => {
+    setInput(nextValue);
+    const resolved = resolveGuessToCountry(nextValue, lookup);
+    if (!resolved) return;
+    if (!activeRule.allow.has(resolved)) return;
+    if (correctSet.has(resolved)) return;
+    submit(nextValue);
   };
 
   if (!started) {
@@ -119,13 +128,21 @@ export default function ChaosModePage() {
           <p className="text-sm text-[#5a6b7a]">Current rule ({ruleTick}s):</p>
           <p className="text-2xl font-black text-[#e76f51] mt-1">{activeRule.label}</p>
         </div>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type country..."
-          className="w-full rounded-xl border border-[#d8e0eb] px-4 py-3"
-        />
-        <button onClick={submit} className="neon-btn-primary w-full py-3">Submit</button>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            submit();
+          }}
+          className="space-y-2"
+        >
+          <input
+            value={input}
+            onChange={(e) => handleInputChange(e.target.value)}
+            placeholder="Type country..."
+            className="w-full rounded-xl border border-[#d8e0eb] px-4 py-3"
+          />
+          <button type="submit" className="neon-btn-primary w-full py-3">Submit</button>
+        </form>
         <p className="text-sm text-[#5a6b7a]">Correct: {correctSet.size} | Wrong: {wrong}</p>
       </div>
     </main>
