@@ -94,6 +94,8 @@ export default function EliminationPage() {
             title="Country Outline Prompt"
             mapHeightClass="h-[320px] md:h-[520px]"
             cropToFocus
+            focusPaddingRatio={0.14}
+            minFocusViewportRatio={0.28}
             hideNonScopeCountries={false}
           />
         </div>

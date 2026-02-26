@@ -19,6 +19,8 @@ interface WorldGuessMapProps {
   enableTilt3d?: boolean;
   hideNonScopeCountries?: boolean;
   cropToFocus?: boolean;
+  focusPaddingRatio?: number;
+  minFocusViewportRatio?: number;
   interactionResetKey?: string;
 }
 
@@ -260,6 +262,8 @@ export function WorldGuessMap({
   enableTilt3d = false,
   hideNonScopeCountries = false,
   cropToFocus = true,
+  focusPaddingRatio = 0.08,
+  minFocusViewportRatio = 0,
   interactionResetKey,
 }: WorldGuessMapProps) {
   const [data, setData] = useState<GeoData | null>(null);
@@ -395,14 +399,29 @@ export function WorldGuessMap({
     if (!merged) {
       return { minX: 0, minY: 0, width: WIDTH, height: HEIGHT };
     }
-    const padded = paddedBounds(merged, 0.08);
+    const padded = paddedBounds(merged, focusPaddingRatio);
+    const currentWidth = Math.max(10, padded.maxX - padded.minX);
+    const currentHeight = Math.max(10, padded.maxY - padded.minY);
+    const minWidth = Math.max(10, WIDTH * Math.max(0, Math.min(1, minFocusViewportRatio)));
+    const minHeight = Math.max(10, HEIGHT * Math.max(0, Math.min(1, minFocusViewportRatio)));
+
+    const centerX = (padded.minX + padded.maxX) / 2;
+    const centerY = (padded.minY + padded.maxY) / 2;
+    const finalWidth = Math.max(currentWidth, minWidth);
+    const finalHeight = Math.max(currentHeight, minHeight);
+
+    const clampedWidth = Math.min(WIDTH, finalWidth);
+    const clampedHeight = Math.min(HEIGHT, finalHeight);
+    const minX = Math.max(0, Math.min(WIDTH - clampedWidth, centerX - clampedWidth / 2));
+    const minY = Math.max(0, Math.min(HEIGHT - clampedHeight, centerY - clampedHeight / 2));
+
     return {
-      minX: padded.minX,
-      minY: padded.minY,
-      width: Math.max(10, padded.maxX - padded.minX),
-      height: Math.max(10, padded.maxY - padded.minY),
+      minX,
+      minY,
+      width: clampedWidth,
+      height: clampedHeight,
     };
-  }, [countries, cropToFocus, focusRegion, focusSet]);
+  }, [countries, cropToFocus, focusPaddingRatio, focusRegion, focusSet, minFocusViewportRatio]);
 
   useEffect(() => {
     if (!enableZoomPan) return;
