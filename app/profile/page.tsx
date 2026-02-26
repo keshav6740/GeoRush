@@ -36,6 +36,14 @@ interface PlayerProfile {
   lastActiveDate: string | null;
   activityHeatmap: Record<string, number>;
   badges: string[];
+  xp: number;
+  level: number;
+  levelTitle: string;
+  xpIntoLevel: number;
+  xpToNextLevel: number;
+  nextStreakMilestone: number | null;
+  streakProgressToNext: number;
+  dontBreakStreakReminder: boolean;
 }
 
 function toLabel(id: string) {
@@ -325,6 +333,43 @@ export default function ProfilePage() {
           <div className="stat-card">
             <div className="stat-title">Longest</div>
             <div className="stat-value">{profile.longestStreak}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="neon-card p-4 md:p-6 space-y-3">
+            <h2 className="text-xl font-bold text-[#1f2937]">Geo XP & Level</h2>
+            <p className="text-sm text-[#5a6b7a]">
+              Level {profile.level} - {profile.levelTitle}
+            </p>
+            <p className="text-2xl font-bold text-[#1f6feb]">{profile.xp} XP</p>
+            <div>
+              <div className="h-2 bg-[#edf2f7] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#1f6feb]"
+                  style={{ width: `${Math.max(4, Math.min(100, Math.round((profile.xpIntoLevel / Math.max(1, profile.xpIntoLevel + profile.xpToNextLevel)) * 100)))}%` }}
+                />
+              </div>
+              <p className="text-xs text-[#5a6b7a] mt-1">{profile.xpToNextLevel} XP to next level</p>
+            </div>
+          </div>
+
+          <div className="neon-card p-4 md:p-6 space-y-3">
+            <h2 className="text-xl font-bold text-[#1f2937]">Daily Streak</h2>
+            <p className="text-sm text-[#5a6b7a]">Current streak: {profile.currentStreak} day(s)</p>
+            {profile.nextStreakMilestone ? (
+              <>
+                <p className="text-sm text-[#5a6b7a]">Next milestone: {profile.nextStreakMilestone} days</p>
+                <div className="h-2 bg-[#edf2f7] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#2a9d8f]" style={{ width: `${profile.streakProgressToNext}%` }} />
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-[#2a9d8f] font-semibold">Top milestone reached.</p>
+            )}
+            {profile.dontBreakStreakReminder && (
+              <p className="text-sm text-[#d14343] font-semibold">Don&apos;t break your streak today.</p>
+            )}
           </div>
         </div>
 

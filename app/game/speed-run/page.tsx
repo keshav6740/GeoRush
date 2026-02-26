@@ -16,6 +16,15 @@ export default function SpeedRunPage() {
   const [showCountdown, setShowCountdown] = useState(true);
   const [showResults, setShowResults] = useState(false);
   const [displayedAnswers, setDisplayedAnswers] = useState<string[]>([]);
+  const [challengeScore, setChallengeScore] = useState<number | null>(null);
+  const [challengeFrom, setChallengeFrom] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const parsedScore = Number.parseInt(params.get('score') ?? '', 10);
+    setChallengeScore(Number.isFinite(parsedScore) && parsedScore > 0 ? parsedScore : null);
+    setChallengeFrom(params.get('from') ?? '');
+  }, []);
 
   // Handle countdown completion
   const handleCountdownComplete = () => {
@@ -88,6 +97,11 @@ export default function SpeedRunPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[#1f2937] mb-2">Speed Run Challenge</h1>
           <p className="text-[#5a6b7a]">Name as many countries as you can!</p>
+          {challengeScore !== null && (
+            <p className="text-sm text-[#9a3412] mt-2">
+              Challenge from {challengeFrom || 'a friend'}: beat {challengeScore}
+            </p>
+          )}
         </div>
 
         {/* Timer */}

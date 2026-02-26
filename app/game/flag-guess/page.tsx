@@ -88,6 +88,8 @@ export default function FlagGuessPage() {
   const [feedback, setFeedback] = useState<{ correct: boolean; expectedCountry: string; bonus: number } | null>(null);
   const [locked, setLocked] = useState(false);
   const ROUNDS = 10;
+  const [challengeScore, setChallengeScore] = useState<number | null>(null);
+  const [challengeFrom, setChallengeFrom] = useState('');
 
   const countryLookup = useMemo(() => buildCountryLookup(COUNTRY_NAMES), []);
   const currentCountry = countries[currentRoundIdx];
@@ -96,6 +98,13 @@ export default function FlagGuessPage() {
 
   useEffect(() => {
     setCountries(pickRandomCountries(ROUNDS));
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const parsedScore = Number.parseInt(params.get('score') ?? '', 10);
+    setChallengeScore(Number.isFinite(parsedScore) && parsedScore > 0 ? parsedScore : null);
+    setChallengeFrom(params.get('from') ?? '');
   }, []);
 
   useEffect(() => {
@@ -199,6 +208,12 @@ export default function FlagGuessPage() {
               Guess the country from each flag. Faster correct answers earn more points. You can reveal and skip if stuck.
             </p>
           </div>
+          {challengeScore !== null && (
+            <div className="rounded-lg border border-[#f4a261] bg-[#fff7ed] p-4 text-left">
+              <p className="text-sm font-semibold text-[#9a3412]">Challenge from {challengeFrom || 'a friend'}</p>
+              <p className="text-sm text-[#7c2d12]">Target score to beat: {challengeScore}</p>
+            </div>
+          )}
           <button onClick={handleStartGame} className="neon-btn-primary w-full py-3 text-lg" disabled={flagsLoading}>
             {flagsLoading ? 'Loading Flags...' : 'Start Challenge'}
           </button>

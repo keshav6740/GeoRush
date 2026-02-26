@@ -20,6 +20,7 @@ interface SporcleCountryQuizProps {
   mapHeightClass?: string;
   inputFirst?: boolean;
   showRecentGuesses?: boolean;
+  hideMap?: boolean;
 }
 
 export function SporcleCountryQuiz({
@@ -35,6 +36,7 @@ export function SporcleCountryQuiz({
   mapHeightClass,
   inputFirst = false,
   showRecentGuesses = true,
+  hideMap = false,
 }: SporcleCountryQuizProps) {
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -43,6 +45,8 @@ export function SporcleCountryQuiz({
   const [guessedCountries, setGuessedCountries] = useState<string[]>([]);
   const [revealedCountries, setRevealedCountries] = useState<string[]>([]);
   const [gaveUp, setGaveUp] = useState(false);
+  const [challengeScore, setChallengeScore] = useState<number | null>(null);
+  const [challengeFrom, setChallengeFrom] = useState('');
 
   const targetList = useMemo(() => Array.from(new Set(targetCountries)), [targetCountries]);
   const targetSet = useMemo(() => new Set(targetList), [targetList]);
@@ -55,6 +59,12 @@ export function SporcleCountryQuiz({
   );
 
   const score = guessedCountries.length * 10 + Math.floor(timeRemaining / 6);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const parsedScore = Number.parseInt(params.get('score') ?? '', 10);
+    setChallengeScore(Number.isFinite(parsedScore) && parsedScore > 0 ? parsedScore : null);
+    setChallengeFrom(params.get('from') ?? '');
+  }, []);
 
   useEffect(() => {
     if (!started || finished) return;
@@ -134,6 +144,14 @@ export function SporcleCountryQuiz({
               No hints, no autocomplete. Type exact country names and they fill live on the map.
             </p>
           </div>
+          {challengeScore !== null && (
+            <div className="rounded-lg border border-[#f4a261] bg-[#fff7ed] p-4 text-left">
+              <p className="text-sm font-semibold text-[#9a3412]">
+                Challenge from {challengeFrom || 'a friend'}
+              </p>
+              <p className="text-sm text-[#7c2d12]">Target score to beat: {challengeScore}</p>
+            </div>
+          )}
           <button onClick={() => setStarted(true)} className="neon-btn-primary w-full py-3 text-lg">
             Start Quiz
           </button>
@@ -288,7 +306,7 @@ export function SporcleCountryQuiz({
           </div>
         )}
 
-        {emphasizeMap && (
+        {emphasizeMap && !hideMap && (
           <WorldGuessMap
             guessedCountries={guessedCountries}
             focusCountries={targetList}
@@ -382,7 +400,7 @@ export function SporcleCountryQuiz({
         </div>
         )}
 
-        {!emphasizeMap && (
+        {!emphasizeMap && !hideMap && (
           <WorldGuessMap
             guessedCountries={guessedCountries}
             focusCountries={targetList}

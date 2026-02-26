@@ -11,6 +11,15 @@ interface HomeStats {
   userRank: number | null;
 }
 
+interface HomeProfileHook {
+  currentStreak: number;
+  nextStreakMilestone: number | null;
+  dontBreakStreakReminder: boolean;
+  level: number;
+  levelTitle: string;
+  xp: number;
+}
+
 const QUICK_CHALLENGES = [
   { country: 'Japan', capital: 'Tokyo', hint: 'Island nation in East Asia' },
   { country: 'Brazil', capital: 'Brasilia', hint: 'Largest country in South America' },
@@ -41,10 +50,25 @@ export default function Page() {
   const [feedback, setFeedback] = useState<string>('');
   const [streak, setStreak] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [profileHook, setProfileHook] = useState<HomeProfileHook | null>(null);
 
   useEffect(() => {
-    const { playerId } = getOrCreatePlayerIdentity();
+    const { playerId, playerName } = getOrCreatePlayerIdentity();
     setIsAuthenticated(getAuthSession().isAuthenticated);
+    void fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId, playerName }),
+    })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        const payload = (await response.json()) as { profile?: HomeProfileHook };
+        return payload.profile ?? null;
+      })
+      .then((profile) => {
+        if (profile) setProfileHook(profile);
+      })
+      .catch(() => undefined);
     void fetch(`/api/leaderboard?limit=100&playerId=${encodeURIComponent(playerId)}`)
       .then(async (response) => {
         if (!response.ok) return null;
@@ -165,6 +189,21 @@ export default function Page() {
                   <div className="text-3xl font-extrabold text-[#1f2937]">{stats.userRank ? `#${stats.userRank}` : '-'}</div>
                 </div>
               </div>
+
+              {profileHook && (
+                <div className="rounded-2xl border border-[#d4deea] bg-white/92 p-4 space-y-1">
+                  <p className="text-sm font-semibold text-[#1f2937]">
+                    Level {profileHook.level} - {profileHook.levelTitle} ({profileHook.xp} XP)
+                  </p>
+                  <p className="text-sm text-[#5a6b7a]">
+                    Daily streak: {profileHook.currentStreak} day(s)
+                    {profileHook.nextStreakMilestone ? ` | Next milestone: ${profileHook.nextStreakMilestone}` : ''}
+                  </p>
+                  {profileHook.dontBreakStreakReminder && (
+                    <p className="text-sm font-semibold text-[#d14343]">Don&apos;t break your streak today.</p>
+                  )}
+                </div>
+              )}
 
               <div className="mt-2 rounded-2xl border border-[#d4deea] bg-white/92 p-4 space-y-3">
                 <div className="flex items-center justify-between">

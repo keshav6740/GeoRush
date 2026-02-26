@@ -25,8 +25,15 @@ interface LeaderboardPayload {
   };
 }
 
+interface RecordSummary {
+  topSpeedToday: { name: string; score: number } | null;
+  topWorldToday: { name: string; score: number } | null;
+  topDuelToday: { name: string; score: number } | null;
+}
+
 export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardPayload | null>(null);
+  const [records, setRecords] = useState<RecordSummary | null>(null);
   const [mode, setMode] = useState<string>('all');
 
   useEffect(() => {
@@ -48,6 +55,16 @@ export default function LeaderboardPage() {
         if (payload) {
           setData(payload);
         }
+      })
+      .catch(() => undefined);
+
+    void fetch('/api/leaderboard?records=1')
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return (await response.json()) as RecordSummary;
+      })
+      .then((payload) => {
+        if (payload) setRecords(payload);
       })
       .catch(() => undefined);
   }, [mode]);
@@ -142,6 +159,41 @@ export default function LeaderboardPage() {
             </div>
           </div>
         </div>
+
+        {records && (
+          <div className="neon-card p-4 md:p-6 mb-8">
+            <h2 className="text-xl font-bold text-[#1f2937] mb-4">World Record Board (Today)</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="rounded-xl border border-[#d8e0eb] bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.12em] text-[#5a6b7a]">Speed Run</p>
+                <p className="text-lg font-bold text-[#1f2937] mt-1">
+                  {records.topSpeedToday ? records.topSpeedToday.name : '-'}
+                </p>
+                <p className="text-sm text-[#1f6feb]">
+                  {records.topSpeedToday ? records.topSpeedToday.score : 'No run yet'}
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#d8e0eb] bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.12em] text-[#5a6b7a]">World Quiz</p>
+                <p className="text-lg font-bold text-[#1f2937] mt-1">
+                  {records.topWorldToday ? records.topWorldToday.name : '-'}
+                </p>
+                <p className="text-sm text-[#1f6feb]">
+                  {records.topWorldToday ? records.topWorldToday.score : 'No run yet'}
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#d8e0eb] bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.12em] text-[#5a6b7a]">Duel</p>
+                <p className="text-lg font-bold text-[#1f2937] mt-1">
+                  {records.topDuelToday ? records.topDuelToday.name : '-'}
+                </p>
+                <p className="text-sm text-[#1f6feb]">
+                  {records.topDuelToday ? records.topDuelToday.score : 'No run yet'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mb-8">
           <PlayerProgressPanel />

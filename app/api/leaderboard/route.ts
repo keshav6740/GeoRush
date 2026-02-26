@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getLeaderboard, submitScore } from '@/lib/leaderboardStore';
+import { getLeaderboard, getRecordsSummary, submitScore } from '@/lib/leaderboardStore';
 import { toModeKey } from '@/lib/scoring';
 
 export const runtime = 'nodejs';
@@ -9,9 +9,14 @@ export async function GET(request: Request) {
   const mode = searchParams.get('mode') || undefined;
   const limitParam = searchParams.get('limit');
   const playerId = searchParams.get('playerId') || undefined;
+  const records = searchParams.get('records') === '1';
   const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined;
 
   try {
+    if (records) {
+      const summary = await getRecordsSummary();
+      return NextResponse.json(summary);
+    }
     const data = await getLeaderboard({
       mode,
       limit,
@@ -70,6 +75,7 @@ export async function POST(request: Request) {
       rawScore: result.rawScore,
       streakBonus: result.streakBonus,
       finalScore: result.finalScore,
+      xpAward: result.xpAward,
       rank: result.rank,
       betterThan: result.betterThan,
       players: result.players,

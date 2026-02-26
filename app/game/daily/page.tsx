@@ -27,6 +27,15 @@ export default function DailyChallengePage() {
   const [feedback, setFeedback] = useState<{ correct: boolean; capital: string; bonus: number } | null>(null);
   const [locked, setLocked] = useState(false);
   const ROUNDS = 10;
+  const [challengeScore, setChallengeScore] = useState<number | null>(null);
+  const [challengeFrom, setChallengeFrom] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const parsedScore = Number.parseInt(params.get('score') ?? '', 10);
+    setChallengeScore(Number.isFinite(parsedScore) && parsedScore > 0 ? parsedScore : null);
+    setChallengeFrom(params.get('from') ?? '');
+  }, []);
 
   const dailyCountries = useMemo(
     () => shuffleWithSeed(COUNTRIES, seed).slice(0, ROUNDS),
@@ -109,6 +118,12 @@ export default function DailyChallengePage() {
               Countries flash briefly, then type the capital. Faster = more points.
             </p>
           </div>
+          {challengeScore !== null && (
+            <div className="rounded-lg border border-[#f4a261] bg-[#fff7ed] p-4 text-left">
+              <p className="text-sm font-semibold text-[#9a3412]">Challenge from {challengeFrom || 'a friend'}</p>
+              <p className="text-sm text-[#7c2d12]">Target score to beat: {challengeScore}</p>
+            </div>
+          )}
           <button
             onClick={handleStartGame}
             className="neon-btn-primary w-full py-3 text-lg"

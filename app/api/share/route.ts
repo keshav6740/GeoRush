@@ -145,6 +145,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const mode = getParam(searchParams, 'mode', 'GeoRush');
   const score = getParam(searchParams, 'score', '0');
+  const rank = getParam(searchParams, 'rank', '-');
   const accuracy = getParam(searchParams, 'accuracy', '0');
   const correct = getParam(searchParams, 'correct', '0');
   const total = getParam(searchParams, 'total', '0');
@@ -219,7 +220,7 @@ export async function GET(request: Request) {
     'div',
     { style: { display: 'flex', flexDirection: 'column', gap: '12px', width: '58%' } },
     React.createElement('div', { style: { fontSize: '48px', fontWeight: 800 } }, mode),
-    React.createElement('div', { style: { fontSize: '28px' } }, `Score: ${score}`),
+    React.createElement('div', { style: { fontSize: '28px' } }, `Score: ${score} | Rank: #${rank}`),
     React.createElement(
       'div',
       { style: { fontSize: '24px' } },

@@ -40,6 +40,8 @@ export default function CapitalGuessPage() {
   const [feedback, setFeedback] = useState<{ correct: boolean; answer: string; expectedAnswer: string; bonus: number } | null>(null);
   const [locked, setLocked] = useState(false);
   const ROUNDS = 10;
+  const [challengeScore, setChallengeScore] = useState<number | null>(null);
+  const [challengeFrom, setChallengeFrom] = useState('');
   const modeConfig = {
     'country-to-capital': {
       title: 'Country to Capital',
@@ -62,6 +64,13 @@ export default function CapitalGuessPage() {
   // Initialize game with shuffled countries
   useEffect(() => {
     setCountries(pickRandomCountries(ROUNDS));
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const parsedScore = Number.parseInt(params.get('score') ?? '', 10);
+    setChallengeScore(Number.isFinite(parsedScore) && parsedScore > 0 ? parsedScore : null);
+    setChallengeFrom(params.get('from') ?? '');
   }, []);
 
   const handleStartGame = () => {
@@ -173,6 +182,12 @@ export default function CapitalGuessPage() {
               {modeConfig[mode].formatBlurb}
             </p>
           </div>
+          {challengeScore !== null && (
+            <div className="rounded-lg border border-[#f4a261] bg-[#fff7ed] p-4 text-left">
+              <p className="text-sm font-semibold text-[#9a3412]">Challenge from {challengeFrom || 'a friend'}</p>
+              <p className="text-sm text-[#7c2d12]">Target score to beat: {challengeScore}</p>
+            </div>
+          )}
           <button
             onClick={handleStartGame}
             className="neon-btn-primary w-full py-3 text-lg"

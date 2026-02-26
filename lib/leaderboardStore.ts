@@ -1,6 +1,6 @@
 ﻿import { promises as fs } from 'fs';
 import path from 'path';
-import { calculateRawModeScore, calculateStreakBonus, type ModeKey, toModeKey } from '@/lib/scoring';
+import { calculateModeXp, calculateRawModeScore, calculateStreakBonus, type ModeKey, toModeKey } from '@/lib/scoring';
 
 export interface ScoreInput {
   playerId: string;
@@ -43,6 +43,7 @@ interface StoredRun {
   score: number;
   bonusScore: number;
   finalScore: number;
+  xpAward: number;
   correct: number;
   total: number;
   accuracy: number;
@@ -79,6 +80,7 @@ interface StoredPlayer {
   badges: string[];
   authProvider: 'guest' | 'google';
   linkedGoogle?: LinkedGoogle;
+  lastLoginDate?: string | null;
 }
 
 interface LeaderboardStore {
@@ -103,6 +105,14 @@ export interface PlayerProfile {
   lastActiveDate: string | null;
   activityHeatmap: Record<string, number>;
   badges: string[];
+  xp: number;
+  level: number;
+  levelTitle: string;
+  xpIntoLevel: number;
+  xpToNextLevel: number;
+  nextStreakMilestone: number | null;
+  streakProgressToNext: number;
+  dontBreakStreakReminder: boolean;
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -120,6 +130,20 @@ const SCORE_BADGES: Array<{ id: string; minLifetime: number }> = [
   { id: 'score_grinder_5k', minLifetime: 5000 },
   { id: 'score_legend_20k', minLifetime: 20000 },
 ];
+const STREAK_MILESTONES = [7, 30, 100];
+const XP_LEVELS: Array<{ level: number; title: string; xpNeeded: number }> = [
+  { level: 1, title: 'Explorer', xpNeeded: 0 },
+  { level: 2, title: 'Pathfinder', xpNeeded: 100 },
+  { level: 3, title: 'Navigator', xpNeeded: 250 },
+  { level: 4, title: 'Wayfinder', xpNeeded: 450 },
+  { level: 5, title: 'Cartographer', xpNeeded: 700 },
+  { level: 6, title: 'Atlas Scholar', xpNeeded: 1000 },
+  { level: 7, title: 'Geo Strategist', xpNeeded: 1400 },
+  { level: 8, title: 'World Analyst', xpNeeded: 1900 },
+  { level: 9, title: 'Continental Master', xpNeeded: 2500 },
+  { level: 10, title: 'Geo Legend', xpNeeded: 3200 },
+];
+const PRESTIGE_TITLES = ['Atlas Titan', 'Border Overlord', 'Planetary Mind', 'Geo Deity'];
 
 let writeQueue = Promise.resolve();
 
@@ -176,6 +200,41 @@ function daysBetweenIso(left: string, right: string) {
 
 function mergeBadges(existing: string[], next: string[]) {
   return [...new Set([...existing, ...next])].sort();
+}
+
+function progressionFromXp(xp: number) {
+  let levelInfo = XP_LEVELS[0];
+  for (const row of XP_LEVELS) {
+    if (xp >= row.xpNeeded) levelInfo = row;
+  }
+
+  let level = levelInfo.level;
+  let title = levelInfo.title;
+  let levelBase = levelInfo.xpNeeded;
+  let nextBase = XP_LEVELS.find((row) => row.level === level + 1)?.xpNeeded ?? (levelBase + 1200);
+
+  if (xp >= XP_LEVELS[XP_LEVELS.length - 1].xpNeeded) {
+    const extra = xp - XP_LEVELS[XP_LEVELS.length - 1].xpNeeded;
+    const prestigeTier = Math.min(PRESTIGE_TITLES.length - 1, Math.floor(extra / 3000));
+    title = PRESTIGE_TITLES[prestigeTier];
+    level = 10 + prestigeTier + 1;
+    levelBase = XP_LEVELS[XP_LEVELS.length - 1].xpNeeded + prestigeTier * 3000;
+    nextBase = levelBase + 3000;
+  }
+
+  return {
+    level,
+    levelTitle: title,
+    xpIntoLevel: Math.max(0, xp - levelBase),
+    xpToNextLevel: Math.max(0, nextBase - xp),
+  };
+}
+
+function nextStreakMilestone(currentStreak: number) {
+  for (const value of STREAK_MILESTONES) {
+    if (currentStreak < value) return value;
+  }
+  return null;
 }
 
 function computeBadges(player: StoredPlayer): string[] {
@@ -262,6 +321,10 @@ function toSafePlayer(id: string, name: string, existing?: Partial<StoredPlayer>
             linkedAt: typeof existing.linkedGoogle.linkedAt === 'string' ? existing.linkedGoogle.linkedAt : new Date().toISOString(),
           }
         : undefined,
+    lastLoginDate:
+      typeof (existing as { lastLoginDate?: unknown })?.lastLoginDate === 'string'
+        ? ((existing as { lastLoginDate?: string }).lastLoginDate ?? null)
+        : null,
   };
 }
 
@@ -298,6 +361,7 @@ function normalizeStore(raw: unknown): LeaderboardStore {
           0,
           1000000
         ),
+        xpAward: clampNumber(Math.round(Number((r as { xpAward?: number }).xpAward ?? 0)), 0, 1000000),
         correct: clampNumber(Math.round(Number(r.correct ?? 0)), 0, 1000000),
         total: clampNumber(Math.round(Number(r.total ?? 0)), 0, 1000000),
         accuracy: clampNumber(Math.round(Number(r.accuracy ?? 0)), 0, 100),
@@ -471,6 +535,12 @@ function applyStreak(player: StoredPlayer, dateKey: string) {
 }
 
 function toProfile(player: StoredPlayer): PlayerProfile {
+  const xp = player.lifetimeScore;
+  const progression = progressionFromXp(xp);
+  const nextMilestone = nextStreakMilestone(player.currentStreak);
+  const today = new Date().toISOString().slice(0, 10);
+  const dateGap = player.lastActiveDate ? daysBetweenIso(player.lastActiveDate, today) : 0;
+
   return {
     id: player.id,
     name: player.name,
@@ -488,6 +558,14 @@ function toProfile(player: StoredPlayer): PlayerProfile {
     lastActiveDate: player.lastActiveDate,
     activityHeatmap: player.activityHeatmap,
     badges: player.badges,
+    xp,
+    level: progression.level,
+    levelTitle: progression.levelTitle,
+    xpIntoLevel: progression.xpIntoLevel,
+    xpToNextLevel: progression.xpToNextLevel,
+    nextStreakMilestone: nextMilestone,
+    streakProgressToNext: nextMilestone ? Math.max(0, Math.min(100, Math.round((player.currentStreak / nextMilestone) * 100))) : 100,
+    dontBreakStreakReminder: dateGap === 1,
   };
 }
 
@@ -519,6 +597,17 @@ export async function submitScore(input: ScoreInput) {
     });
     const streakBonus = calculateStreakBonus(rawScore, player.currentStreak);
     const finalScore = rawScore + streakBonus;
+    const xpAward = calculateModeXp({
+      modeKey: safe.modeKey ?? toModeKey(safe.gameMode),
+      correct: safe.correct,
+      total: safe.total,
+      durationSeconds: safe.durationSeconds,
+      timeRemainingSeconds: safe.timeRemainingSeconds,
+      timeSpentSeconds: safe.timeSpentSeconds,
+      previousBestScore: player.bestScore,
+      currentStreak: player.currentStreak,
+      wonDuel: rawScore > 0 && safe.modeKey === 'duel',
+    });
 
     const run: StoredRun = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
@@ -529,6 +618,7 @@ export async function submitScore(input: ScoreInput) {
       score: rawScore,
       bonusScore: streakBonus,
       finalScore,
+      xpAward,
       correct: safe.correct,
       total: safe.total,
       accuracy: accuracyFrom(safe.correct, safe.total),
@@ -547,7 +637,7 @@ export async function submitScore(input: ScoreInput) {
     player.gamesPlayed += 1;
     player.bestScore = Math.max(player.bestScore, rawScore);
     player.lastPlayedAt = nowIso;
-    player.lifetimeScore += finalScore;
+    player.lifetimeScore += xpAward;
 
     const modeKey = run.modeKey;
     player.modeScores[modeKey] = (player.modeScores[modeKey] ?? 0) + finalScore;
@@ -581,6 +671,7 @@ export async function submitScore(input: ScoreInput) {
       rawScore,
       streakBonus,
       finalScore,
+      xpAward,
       rank: meta.userRank,
       betterThan: meta.betterThan,
       players: meta.players,
@@ -674,6 +765,11 @@ export async function upsertPlayerBaseProfile(playerId: string, playerName: stri
     const store = await readStore();
     const player = toSafePlayer(safeId, safeName, store.players[safeId]);
     player.name = safeName;
+    const today = new Date().toISOString().slice(0, 10);
+    if (player.lastLoginDate !== today) {
+      player.lifetimeScore += 10;
+      player.lastLoginDate = today;
+    }
     store.players[safeId] = player;
 
     await writeStore(store);
@@ -759,4 +855,34 @@ export async function updatePlayerProfile(
 
     return toProfile(player);
   });
+}
+
+export async function getRecordsSummary() {
+  const store = await readStore();
+  const today = new Date().toISOString().slice(0, 10);
+  const todayRuns = store.runs.filter((run) => run.playedAt.slice(0, 10) === today);
+
+  const topSpeedToday = todayRuns
+    .filter((run) => run.modeKey === 'speed-run')
+    .sort((a, b) => b.score - a.score)[0];
+
+  const topWorldToday = todayRuns
+    .filter((run) => run.modeKey === 'world-quiz')
+    .sort((a, b) => b.score - a.score)[0];
+
+  const topDuelToday = todayRuns
+    .filter((run) => run.modeKey === 'duel')
+    .sort((a, b) => b.score - a.score)[0];
+
+  return {
+    topSpeedToday: topSpeedToday
+      ? { name: topSpeedToday.playerName, score: topSpeedToday.score }
+      : null,
+    topWorldToday: topWorldToday
+      ? { name: topWorldToday.playerName, score: topWorldToday.score }
+      : null,
+    topDuelToday: topDuelToday
+      ? { name: topDuelToday.playerName, score: topDuelToday.score }
+      : null,
+  };
 }

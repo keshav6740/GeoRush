@@ -35,6 +35,7 @@ export function ResultsCard({
   const [liveScore, setLiveScore] = useState<number>(score);
   const [liveStreak, setLiveStreak] = useState<number | null>(null);
   const [liveBadges, setLiveBadges] = useState<number | null>(null);
+  const [xpAward, setXpAward] = useState<number | null>(null);
   const [showGuestSavePrompt, setShowGuestSavePrompt] = useState(false);
   const submittedRef = useRef<string | null>(null);
 
@@ -48,6 +49,7 @@ export function ResultsCard({
   const shareParams = new URLSearchParams({
     mode: gameMode,
     score: String(liveScore),
+    rank: String(rank),
     accuracy: String(accuracy),
     correct: String(correct),
     total: String(total),
@@ -59,6 +61,33 @@ export function ResultsCard({
     shareParams.set('countries', JSON.stringify(countriesGuessed.slice(0, 240)));
   }
   const shareUrl = `/api/share?${shareParams.toString()}`;
+  const playerIdentity = getOrCreatePlayerIdentity();
+  const challengeModePath =
+    gameMode === 'Speed Run'
+      ? '/game/speed-run'
+      : gameMode === 'Daily Challenge'
+      ? '/game/daily'
+      : gameMode === 'Country to Capital' || gameMode === 'Capital to Country'
+      ? '/game/capital-guess'
+      : gameMode === 'Flag Guess'
+      ? '/game/flag-guess'
+      : gameMode === 'World Quiz'
+      ? '/game/world-quiz'
+      : gameMode === 'Continent Quiz'
+      ? '/game/continent-quiz'
+      : '/modes';
+  const challengeLink = `${typeof window !== 'undefined' ? window.location.origin : ''}${challengeModePath}?challenge=1&mode=${encodeURIComponent(
+    gameMode
+  )}&score=${encodeURIComponent(String(liveScore))}&from=${encodeURIComponent(playerIdentity.playerName)}&date=${encodeURIComponent(dateKey)}`;
+  const challengeText = `I scored ${liveScore} in GeoRush ${gameMode}. Can you beat me? ${challengeLink}`;
+  const reachedMilestone =
+    liveStreak && liveStreak >= 100
+      ? 100
+      : liveStreak && liveStreak >= 30
+      ? 30
+      : liveStreak && liveStreak >= 7
+      ? 7
+      : null;
 
   useEffect(() => {
     const signature = `${gameMode}|${score}|${correct}|${total}|${dateKey}`;
@@ -94,6 +123,7 @@ export function ResultsCard({
         if (!response.ok) return null;
         return (await response.json()) as {
           score: number;
+          xpAward?: number;
           rank: number | null;
           betterThan: number;
           profile?: {
@@ -106,6 +136,9 @@ export function ResultsCard({
         if (!payload) return;
         if (typeof payload.score === 'number') {
           setLiveScore(payload.score);
+        }
+        if (typeof payload.xpAward === 'number') {
+          setXpAward(payload.xpAward);
         }
         if (typeof payload.rank === 'number') {
           setLiveRank(payload.rank);
@@ -161,6 +194,28 @@ export function ResultsCard({
     window.open(shareUrl, '_blank');
   };
 
+  const handleWhatsAppShare = () => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(challengeText)}`, '_blank');
+  };
+
+  const handleCopyInstagram = async () => {
+    try {
+      await navigator.clipboard.writeText(challengeText);
+      alert('Challenge text copied. Paste it in Instagram.');
+    } catch {
+      window.prompt('Copy this challenge text for Instagram:', challengeText);
+    }
+  };
+
+  const handleCopyChallengeLink = async () => {
+    try {
+      await navigator.clipboard.writeText(challengeLink);
+      alert('Challenge link copied.');
+    } catch {
+      window.prompt('Copy this challenge link:', challengeLink);
+    }
+  };
+
   return (
     <div className="neon-card p-5 md:p-8 max-w-md w-full space-y-5 md:space-y-6">
       <div className="text-center space-y-2">
@@ -182,6 +237,7 @@ export function ResultsCard({
       <div className="bg-[#ffffff] rounded-lg p-4 text-center border border-[#f4a261] border-opacity-30">
         <p className="text-[#9aa6b2] text-sm mb-2">Daily Rank</p>
         <p className="text-2xl font-bold text-[#f4a261]">#{rank}</p>
+        {xpAward !== null && <p className="text-xs text-[#5a6b7a] mt-1">XP gained: +{xpAward}</p>}
       </div>
 
       <div className="bg-[#fef6e4] rounded-lg p-4 text-center border border-[#8b5cf6] border-opacity-30">
@@ -189,6 +245,9 @@ export function ResultsCard({
         <p className="text-[#5a6b7a] text-sm mt-1">You're better than {betterThanPercentage}% of players today!</p>
         <p className="text-[#5a6b7a] text-sm mt-1">Accuracy: {accuracy}%</p>
         {liveStreak !== null && <p className="text-[#5a6b7a] text-sm mt-1">Current streak: {liveStreak} day(s)</p>}
+        {reachedMilestone && (
+          <p className="text-[#2a9d8f] text-sm mt-1 font-semibold">Streak milestone reached: {reachedMilestone} days</p>
+        )}
         {liveBadges !== null && <p className="text-[#5a6b7a] text-sm mt-1">Badges earned: {liveBadges}</p>}
       </div>
 
@@ -229,6 +288,24 @@ export function ResultsCard({
         <button onClick={handleDownload} className="neon-btn w-full py-3">
           Download Result PNG
         </button>
+      </div>
+
+      <div className="neon-card p-4 space-y-2">
+        <p className="text-sm font-semibold text-[#1f2937]">Challenge a Friend</p>
+        <p className="text-xs text-[#5a6b7a]">
+          {playerIdentity.playerName} scored {liveScore} (rank #{rank}, streak {liveStreak ?? 0}).
+        </p>
+        <div className="grid grid-cols-1 gap-2">
+          <button onClick={handleWhatsAppShare} className="neon-btn w-full py-2.5">
+            Share on WhatsApp
+          </button>
+          <button onClick={handleCopyInstagram} className="neon-btn w-full py-2.5">
+            Copy for Instagram
+          </button>
+          <button onClick={handleCopyChallengeLink} className="neon-btn w-full py-2.5">
+            Copy Beat-My-Score Link
+          </button>
+        </div>
       </div>
     </div>
   );
