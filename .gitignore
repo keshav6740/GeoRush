@@ -8,3 +8,7 @@ node_modules/
 .next/
 .env*.local
 .DS_Store
+
+# Runtime data files (written by the server)
+data/leaderboard.json
+data/duels.json

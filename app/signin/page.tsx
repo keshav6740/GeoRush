@@ -59,6 +59,8 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (!googleClientId) return;
+    // Prevent duplicate script tags (Issue #26)
+    if (document.querySelector('script[src*="accounts.google.com/gsi/client"]')) return;
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -234,17 +236,15 @@ export default function SignInPage() {
             <div className="mb-6 flex rounded-xl bg-[#eef3fb] p-1">
               <button
                 onClick={() => setMode('signup')}
-                className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold ${
-                  mode === 'signup' ? 'bg-white text-[#1f2937] shadow-sm' : 'text-[#60758c]'
-                }`}
+                className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold ${mode === 'signup' ? 'bg-white text-[#1f2937] shadow-sm' : 'text-[#60758c]'
+                  }`}
               >
                 Create account
               </button>
               <button
                 onClick={() => setMode('signin')}
-                className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold ${
-                  mode === 'signin' ? 'bg-white text-[#1f2937] shadow-sm' : 'text-[#60758c]'
-                }`}
+                className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold ${mode === 'signin' ? 'bg-white text-[#1f2937] shadow-sm' : 'text-[#60758c]'
+                  }`}
               >
                 Sign in
               </button>

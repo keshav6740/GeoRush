@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCountryByName, getNeighbors, normalizeText } from '@/lib/countries';
 
 export interface GameState {
@@ -65,26 +65,28 @@ export function useGame(initialMode: string, duration: number = 60) {
       return false;
     }
 
-    const normalizedAnswer = normalizeText(country.name);
-    const alreadyAnswered = gameState.answers.some(
-      existing => normalizeText(existing) === normalizedAnswer
-    );
-    if (alreadyAnswered) {
-      setGameState(prev => ({
+    let wasAccepted = false;
+    setGameState(prev => {
+      const normalizedAnswer = normalizeText(country.name);
+      const alreadyAnswered = prev.answers.some(
+        existing => normalizeText(existing) === normalizedAnswer
+      );
+      if (alreadyAnswered) {
+        return {
+          ...prev,
+          incorrect: prev.incorrect + 1,
+        };
+      }
+      wasAccepted = true;
+      return {
         ...prev,
-        incorrect: prev.incorrect + 1,
-      }));
-      return false; // Already answered
-    }
-
-    setGameState(prev => ({
-      ...prev,
-      answers: [...prev.answers, country.name],
-      score: prev.score + 1,
-      correct: prev.correct + 1,
-    }));
-    return true;
-  }, [gameState.answers]);
+        answers: [...prev.answers, country.name],
+        score: prev.score + 1,
+        correct: prev.correct + 1,
+      };
+    });
+    return wasAccepted;
+  }, []);
 
   const setCurrentCountry = useCallback((country: string) => {
     setGameState(prev => ({
@@ -122,6 +124,12 @@ export function useNeighbourChain(startingCountry: string) {
   const [gameEnded, setGameEnded] = useState(false);
   const [failed, setFailed] = useState(false);
 
+  // Refs to avoid stale closures in submitAnswer (Issue #8)
+  const neighborsRef = useRef(neighbors);
+  const gameEndedRef = useRef(gameEnded);
+  neighborsRef.current = neighbors;
+  gameEndedRef.current = gameEnded;
+
   useEffect(() => {
     const countryNeighbors = getNeighbors(startingCountry);
     setNeighbors(countryNeighbors);
@@ -129,30 +137,43 @@ export function useNeighbourChain(startingCountry: string) {
 
   const submitAnswer = useCallback((answer: string): boolean => {
     const normalizedAnswer = normalizeText(answer);
-    const matchedNeighbor = neighbors.find(
+    const currentNeighbors = neighborsRef.current;
+    const matchedNeighbor = currentNeighbors.find(
       neighbor => normalizeText(neighbor) === normalizedAnswer
     );
 
-    if (!matchedNeighbor || answered.some(a => normalizeText(a) === normalizedAnswer)) {
-      if (!gameEnded) {
+    if (!matchedNeighbor) {
+      if (!gameEndedRef.current) {
         setFailed(true);
         setGameEnded(true);
       }
       return false;
     }
 
-    const newAnswered = [...answered, matchedNeighbor];
-    setAnswered(newAnswered);
-    setScore(prev => prev + 10);
+    let wasAccepted = false;
+    setAnswered(prev => {
+      const alreadyHas = prev.some(a => normalizeText(a) === normalizedAnswer);
+      if (alreadyHas) {
+        return prev;
+      }
+      wasAccepted = true;
+      const newAnswered = [...prev, matchedNeighbor];
+      if (newAnswered.length === currentNeighbors.length) {
+        setScore(s => s + 50);
+        setGameEnded(true);
+      }
+      return newAnswered;
+    });
 
-    // Check if got all neighbors
-    if (newAnswered.length === neighbors.length) {
-      setScore(prev => prev + 50); // Bonus for perfect
+    if (wasAccepted) {
+      setScore(prev => prev + 10);
+    } else if (!gameEndedRef.current) {
+      setFailed(true);
       setGameEnded(true);
     }
 
-    return true;
-  }, [answered, neighbors]);
+    return wasAccepted;
+  }, []);
 
   const getMissedNeighbors = useCallback((): string[] => {
     return neighbors.filter(n => !answered.includes(n));

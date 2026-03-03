@@ -54,7 +54,7 @@ export default function SpeedRunPage() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="max-w-2xl w-full px-4">
-          <h1 className="text-4xl font-bold text-center mb-12 text-[#5a6b7a]">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 text-[#5a6b7a]">
             Speed Run Challenge
           </h1>
           <CountdownTimer onComplete={handleCountdownComplete} />
@@ -81,9 +81,9 @@ export default function SpeedRunPage() {
             <WorldGuessMap guessedCountries={displayedAnswers} title="World Map Highlights" />
           </div>
           <div className="text-center">
-            <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
+            <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors">
               Back to Modes
-            </a>
+            </Link>
           </div>
         </div>
       </main>
@@ -91,11 +91,11 @@ export default function SpeedRunPage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-12">
+    <main className="min-h-screen px-3 sm:px-4 py-6 sm:py-8 md:py-12">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#1f2937] mb-2">Speed Run Challenge</h1>
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1f2937] mb-2">Speed Run Challenge</h1>
           <p className="text-[#5a6b7a]">Name as many countries as you can!</p>
           {challengeScore !== null && (
             <p className="text-sm text-[#9a3412] mt-2">
@@ -105,7 +105,7 @@ export default function SpeedRunPage() {
         </div>
 
         {/* Timer */}
-        <div className="mb-12">
+        <div className="mb-8 sm:mb-12">
           <GameTimer timeRemaining={gameState.timeRemaining} duration={GAME_DURATION} />
         </div>
 
@@ -114,15 +114,15 @@ export default function SpeedRunPage() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-[#9aa6b2] text-sm mb-1">Correct</p>
-              <p className="text-3xl font-bold text-[#2a9d8f]">{gameState.correct}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-[#2a9d8f]">{gameState.correct}</p>
             </div>
             <div>
               <p className="text-[#9aa6b2] text-sm mb-1">Score</p>
-              <p className="text-3xl font-bold text-[#1f6feb]">{gameState.score}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-[#1f6feb]">{gameState.score}</p>
             </div>
             <div>
               <p className="text-[#9aa6b2] text-sm mb-1">Accuracy</p>
-              <p className="text-3xl font-bold text-[#f4a261]">
+              <p className="text-2xl sm:text-3xl font-bold text-[#f4a261]">
                 {calculateAccuracy(gameState.correct, gameState.correct + gameState.incorrect)}%
               </p>
             </div>

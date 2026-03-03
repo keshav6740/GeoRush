@@ -44,6 +44,7 @@ export default function Page() {
     topScore: 0,
     userRank: null,
   });
+  const [statsLoading, setStatsLoading] = useState(true);
   const [shuffledChallenges, setShuffledChallenges] = useState(() => shuffleChallenges());
   const [challengeIndex, setChallengeIndex] = useState(0);
   const [guess, setGuess] = useState('');
@@ -78,7 +79,8 @@ export default function Page() {
       .then((nextStats) => {
         if (nextStats) setStats(nextStats);
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => setStatsLoading(false));
   }, []);
 
   const activeChallenge = shuffledChallenges[challengeIndex];
@@ -111,7 +113,7 @@ export default function Page() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f7fbff] px-4 py-8 md:py-12">
+    <main className="relative min-h-screen overflow-hidden bg-[#f7fbff] px-3 sm:px-4 py-6 sm:py-8 md:py-12">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-28 -left-24 h-96 w-96 rounded-full bg-[#6ec1ff]/35 blur-3xl" />
         <div className="absolute top-1/3 -right-20 h-[30rem] w-[30rem] rounded-full bg-[#9ce6b2]/35 blur-3xl" />
@@ -126,7 +128,7 @@ export default function Page() {
               <Sparkles size={14} />
               Geography Arcade
             </div>
-            <h1 className="mt-3 text-4xl sm:text-5xl md:text-7xl font-extrabold leading-[0.9] tracking-tight bg-gradient-to-r from-[#0f5bd8] via-[#17a06f] to-[#f18a3d] bg-clip-text text-transparent">
+            <h1 className="mt-3 text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold leading-[0.9] tracking-tight bg-gradient-to-r from-[#0f5bd8] via-[#17a06f] to-[#f18a3d] bg-clip-text text-transparent">
               GeoRush
             </h1>
           </div>
@@ -141,9 +143,9 @@ export default function Page() {
         </header>
 
         <section className="grid grid-cols-1 xl:grid-cols-[1.05fr_0.95fr] gap-6 items-stretch">
-          <div className="rounded-[1.5rem] border border-[#d4deea] bg-white/75 backdrop-blur-sm p-7 md:p-8 shadow-[0_16px_50px_rgba(24,66,130,0.10)]">
+          <div className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-[#d4deea] bg-white/75 backdrop-blur-sm p-5 sm:p-7 md:p-8 shadow-[0_16px_50px_rgba(24,66,130,0.10)]">
             <div className="space-y-6">
-              <p className="text-xl sm:text-2xl md:text-4xl font-bold text-[#1d2a3a] leading-tight">
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-4xl font-bold text-[#1d2a3a] leading-tight">
                 Turn map knowledge into reflex.
                 <br />
                 Fast rounds. Real ranks. Daily streaks.
@@ -162,31 +164,34 @@ export default function Page() {
                   </Link>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <Link href="/signin" className="neon-btn-primary text-center py-3.5 text-base font-semibold">
                     Sign In / Sign Up
                   </Link>
                   <Link href="/modes" className="neon-btn text-center py-3.5 text-base font-semibold">
                     Continue as Guest
                   </Link>
-                  <Link href="/signin" className="neon-btn text-center py-3.5 text-base font-semibold">
-                    Open Account
-                  </Link>
                 </div>
               )}
 
-              <div className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="rounded-2xl border border-[#d4deea] bg-white/90 p-4">
+              <div className="pt-2 grid grid-cols-3 gap-2 sm:gap-4">
+                <div className="rounded-xl sm:rounded-2xl border border-[#d4deea] bg-white/90 p-3 sm:p-4">
                   <div className="text-xs uppercase tracking-[0.18em] text-[#6b7f92] mb-2">Players</div>
-                  <div className="text-3xl font-extrabold text-[#1f2937]">{stats.players}</div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1f2937]">
+                    {statsLoading ? <span className="inline-block h-8 w-12 rounded bg-[#edf2f7] animate-pulse" /> : stats.players}
+                  </div>
                 </div>
-                <div className="rounded-2xl border border-[#d4deea] bg-white/90 p-4">
+                <div className="rounded-xl sm:rounded-2xl border border-[#d4deea] bg-white/90 p-3 sm:p-4">
                   <div className="text-xs uppercase tracking-[0.18em] text-[#6b7f92] mb-2">Top Score</div>
-                  <div className="text-3xl font-extrabold text-[#1f2937]">{stats.topScore}</div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1f2937]">
+                    {statsLoading ? <span className="inline-block h-8 w-12 rounded bg-[#edf2f7] animate-pulse" /> : stats.topScore}
+                  </div>
                 </div>
-                <div className="rounded-2xl border border-[#d4deea] bg-white/90 p-4">
+                <div className="rounded-xl sm:rounded-2xl border border-[#d4deea] bg-white/90 p-3 sm:p-4">
                   <div className="text-xs uppercase tracking-[0.18em] text-[#6b7f92] mb-2">Your Rank</div>
-                  <div className="text-3xl font-extrabold text-[#1f2937]">{stats.userRank ? `#${stats.userRank}` : '-'}</div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1f2937]">
+                    {statsLoading ? <span className="inline-block h-8 w-12 rounded bg-[#edf2f7] animate-pulse" /> : (stats.userRank ? `#${stats.userRank}` : '-')}
+                  </div>
                 </div>
               </div>
 

@@ -12,65 +12,10 @@ import {
   setPlayerName,
   signOutPlayer,
 } from '@/lib/playerId';
+import type { PlayerProfile } from '@/lib/types';
+import { heatColor, lastNDaysIso, toLabel } from '@/lib/profileUtils';
 
-interface PlayerProfile {
-  id: string;
-  name: string;
-  avatarUrl?: string;
-  authProvider: 'guest' | 'google';
-  linkedGoogle?: {
-    sub: string;
-    email: string;
-    name: string;
-    picture?: string;
-    linkedAt: string;
-  };
-  gamesPlayed: number;
-  bestScore: number;
-  lifetimeScore: number;
-  worldQuizScore: number;
-  modeScores: Record<string, number>;
-  countryScores: Record<string, number>;
-  currentStreak: number;
-  longestStreak: number;
-  lastActiveDate: string | null;
-  activityHeatmap: Record<string, number>;
-  badges: string[];
-  xp: number;
-  level: number;
-  levelTitle: string;
-  xpIntoLevel: number;
-  xpToNextLevel: number;
-  nextStreakMilestone: number | null;
-  streakProgressToNext: number;
-  dontBreakStreakReminder: boolean;
-}
 
-function toLabel(id: string) {
-  return id
-    .replaceAll('-', ' ')
-    .replaceAll('_', ' ')
-    .replace(/\b\w/g, (m) => m.toUpperCase());
-}
-
-function lastNDaysIso(days: number) {
-  const out: string[] = [];
-  const now = new Date();
-  for (let i = days - 1; i >= 0; i -= 1) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    out.push(d.toISOString().slice(0, 10));
-  }
-  return out;
-}
-
-function heatColor(value: number) {
-  if (value <= 0) return 'bg-[#eef2f7]';
-  if (value === 1) return 'bg-[#b8f2d2]';
-  if (value <= 3) return 'bg-[#72e2ad]';
-  if (value <= 6) return 'bg-[#2fbb86]';
-  return 'bg-[#13855e]';
-}
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
@@ -253,8 +198,8 @@ export default function ProfilePage() {
         <div className="rounded-2xl overflow-hidden border border-[#d8e0eb] bg-white shadow-sm">
           <div className="h-32 bg-gradient-to-r from-[#d4f1f4] via-[#fef6e4] to-[#fde2e4]" />
           <div className="px-4 md:px-6 pb-5 md:pb-6 pt-0">
-            <div className="flex flex-wrap items-end justify-between gap-4 -mt-10">
-              <div className="flex items-end gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-3 -mt-10">
+              <div className="flex items-end gap-3">
                 <div className="relative group">
                   {profile.avatarUrl ? (
                     <img
@@ -277,7 +222,7 @@ export default function ProfilePage() {
                   </button>
                 </div>
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-[#1f2937] break-words">{profile.name}</h1>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#1f2937] break-words">{profile.name}</h1>
                   <p className="text-[#5a6b7a] text-sm">
                     {profile.authProvider === 'google'
                       ? 'Google linked account'
@@ -309,7 +254,7 @@ export default function ProfilePage() {
           <div className="neon-card p-3 text-sm text-[#5a6b7a]">{saveMessage}</div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3">
           <div className="stat-card">
             <div className="stat-title">Games</div>
             <div className="stat-value">{profile.gamesPlayed}</div>
@@ -375,14 +320,17 @@ export default function ProfilePage() {
 
         <div className="neon-card p-4 md:p-6">
           <h2 className="text-xl font-bold text-[#1f2937] mb-3">365-Day Streak Heatmap</h2>
-          <div className="grid grid-cols-[repeat(53,minmax(0,1fr))] gap-1 overflow-x-auto pb-2">
-            {heatmapDays.map((day) => (
-              <div
-                key={day}
-                className={`h-3 w-3 rounded-sm ${heatColor(profile.activityHeatmap[day] ?? 0)}`}
-                title={`${day}: ${profile.activityHeatmap[day] ?? 0} runs`}
-              />
-            ))}
+          <div className="relative overflow-x-auto -mx-2 px-2 pb-2">
+            <div className="grid gap-[2px] sm:gap-[3px]" style={{ gridTemplateColumns: 'repeat(53, minmax(8px, 12px))', gridAutoRows: 'minmax(8px, 12px)', minWidth: '450px', width: 'max-content' }}>
+              {heatmapDays.map((day) => (
+                <div
+                  key={day}
+                  className={`rounded-[2px] ${heatColor(profile.activityHeatmap[day] ?? 0)}`}
+                  title={`${day}: ${profile.activityHeatmap[day] ?? 0} runs`}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-[#9aa6b2] mt-2 sm:hidden">Swipe to see full year →</p>
           </div>
         </div>
 
@@ -483,9 +431,8 @@ export default function ProfilePage() {
                   setAvatarDragActive(false);
                 }}
                 onDrop={handleAvatarDrop}
-                className={`border-2 border-dashed rounded-lg p-4 text-sm ${
-                  avatarDragActive ? 'border-[#2a9d8f] bg-[#ecfdf5]' : 'border-[#d8e0eb] bg-white'
-                }`}
+                className={`border-2 border-dashed rounded-lg p-4 text-sm ${avatarDragActive ? 'border-[#2a9d8f] bg-[#ecfdf5]' : 'border-[#d8e0eb] bg-white'
+                  }`}
               >
                 <p className="text-[#5a6b7a]">Drag and drop image here, or upload from device.</p>
                 <label className="inline-block mt-3 neon-btn px-3 py-2 cursor-pointer">

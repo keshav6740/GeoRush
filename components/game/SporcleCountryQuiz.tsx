@@ -173,11 +173,10 @@ export function SporcleCountryQuiz({
       <main className="min-h-screen px-4 py-6 md:py-8">
         <div className="max-w-7xl mx-auto space-y-6">
           <div
-            className={`grid grid-cols-1 gap-6 items-start ${
-              emphasizeMap ? 'xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]' : 'xl:grid-cols-2'
-            }`}
+            className={`grid grid-cols-1 gap-6 items-start ${emphasizeMap ? 'xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]' : 'xl:grid-cols-2'
+              }`}
           >
-            {emphasizeMap ? (
+            {emphasizeMap && (
               <WorldGuessMap
                 guessedCountries={guessedCountries}
                 revealedCountries={revealedCountries}
@@ -185,16 +184,6 @@ export function SporcleCountryQuiz({
                 focusRegion={focusRegion}
                 mapHeightClass={mapHeightClass ?? 'h-[420px] md:h-[760px]'}
                 title="Guessed Countries"
-              />
-            ) : (
-              <ResultsCard
-                gameMode={gameMode}
-                score={score}
-                correct={guessedCountries.length}
-                total={targetList.length}
-                durationSeconds={durationSeconds}
-                timeRemainingSeconds={timeRemaining}
-                countriesGuessed={guessedCountries}
               />
             )}
             <ResultsCard
@@ -316,87 +305,87 @@ export function SporcleCountryQuiz({
         )}
 
         {!emphasizeMap && (
-        <div className="neon-card p-6 space-y-5 min-h-[620px]">
-          {inputFirst && (
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                value={input}
-                onChange={(event) => handleInputChange(event.target.value)}
-                autoComplete="off"
-                spellCheck={false}
-                placeholder="Type country name..."
-                className="input-neon w-full text-lg"
-              />
-            </form>
-          )}
+          <div className="neon-card p-6 space-y-5 min-h-[620px]">
+            {inputFirst && (
+              <form onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(event) => handleInputChange(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="Type country name..."
+                  className="input-neon w-full text-lg"
+                />
+              </form>
+            )}
 
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-[#1f2937]">{title}</h1>
-              <p className="text-[#5a6b7a] text-sm">{subtitle}</p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-[#1f2937]">{title}</h1>
+                <p className="text-[#5a6b7a] text-sm">{subtitle}</p>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-[#9aa6b2]">Time Left</div>
+                <div className="text-3xl font-bold text-[#1f6feb]">{formatTime(timeRemaining)}</div>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-xs text-[#9aa6b2]">Time Left</div>
-              <div className="text-3xl font-bold text-[#1f6feb]">{formatTime(timeRemaining)}</div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="stat-card">
+                <div className="stat-title">Guessed</div>
+                <div className="stat-value">{guessedCountries.length}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-title">Remaining</div>
+                <div className="stat-value">{Math.max(0, targetList.length - guessedCountries.length)}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-title">Score</div>
+                <div className="stat-value">{score}</div>
+              </div>
+            </div>
+
+            {!inputFirst && (
+              <form onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(event) => handleInputChange(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="Type country name..."
+                  className="input-neon w-full text-lg"
+                />
+              </form>
+            )}
+
+            {showRecentGuesses && (
+              <div className="min-h-[130px]">
+                <p className="text-sm text-[#9aa6b2] mb-2">Recent Guesses</p>
+                {guessedCountries.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {guessedCountries
+                      .slice(-20)
+                      .reverse()
+                      .map((country) => (
+                        <span key={country} className="pill !py-1 !px-3 text-xs">
+                          {country}
+                        </span>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#5a6b7a]">Start typing to fill the map live.</p>
+                )}
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button onClick={handleGiveUp} className="neon-btn px-4 py-2 text-sm">
+                Give Up
+              </button>
             </div>
           </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div className="stat-card">
-              <div className="stat-title">Guessed</div>
-              <div className="stat-value">{guessedCountries.length}</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-title">Remaining</div>
-              <div className="stat-value">{Math.max(0, targetList.length - guessedCountries.length)}</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-title">Score</div>
-              <div className="stat-value">{score}</div>
-            </div>
-          </div>
-
-          {!inputFirst && (
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                value={input}
-                onChange={(event) => handleInputChange(event.target.value)}
-                autoComplete="off"
-                spellCheck={false}
-                placeholder="Type country name..."
-                className="input-neon w-full text-lg"
-              />
-            </form>
-          )}
-
-          {showRecentGuesses && (
-            <div className="min-h-[130px]">
-              <p className="text-sm text-[#9aa6b2] mb-2">Recent Guesses</p>
-              {guessedCountries.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {guessedCountries
-                    .slice(-20)
-                    .reverse()
-                    .map((country) => (
-                      <span key={country} className="pill !py-1 !px-3 text-xs">
-                        {country}
-                      </span>
-                    ))}
-                </div>
-              ) : (
-                <p className="text-sm text-[#5a6b7a]">Start typing to fill the map live.</p>
-              )}
-            </div>
-          )}
-
-          <div className="flex justify-end">
-            <button onClick={handleGiveUp} className="neon-btn px-4 py-2 text-sm">
-              Give Up
-            </button>
-          </div>
-        </div>
         )}
 
         {!emphasizeMap && !hideMap && (

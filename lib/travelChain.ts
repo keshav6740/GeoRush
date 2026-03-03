@@ -156,9 +156,9 @@ export function getPathWithinCountries(start: string, end: string, allowedCountr
         const path: string[] = [end];
         let cur: string | null = end;
         while (cur) {
-          const parent = prev.get(cur) ?? null;
+          const parent: string | null | undefined = prev.get(cur);
           if (parent) path.push(parent);
-          cur = parent;
+          cur = parent ?? null;
         }
         path.reverse();
         return path;
@@ -187,9 +187,9 @@ export function getShortestPath(start: string, end: string): string[] | null {
         const path: string[] = [end];
         let cur: string | null = end;
         while (cur) {
-          const parent = prev.get(cur) ?? null;
+          const parent: string | null | undefined = prev.get(cur);
           if (parent) path.push(parent);
-          cur = parent;
+          cur = parent ?? null;
         }
         path.reverse();
         return path;

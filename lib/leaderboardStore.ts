@@ -287,14 +287,14 @@ function toSafePlayer(id: string, name: string, existing?: Partial<StoredPlayer>
     modeScores:
       existing?.modeScores && typeof existing.modeScores === 'object'
         ? Object.fromEntries(
-            Object.entries(existing.modeScores).map(([key, value]) => [key, clampNumber(Math.round(Number(value)), 0, 100000000)])
-          )
+          Object.entries(existing.modeScores).map(([key, value]) => [key, clampNumber(Math.round(Number(value)), 0, 100000000)])
+        )
         : {},
     countryScores:
       existing?.countryScores && typeof existing.countryScores === 'object'
         ? Object.fromEntries(
-            Object.entries(existing.countryScores).map(([key, value]) => [key, clampNumber(Math.round(Number(value)), 0, 100000000)])
-          )
+          Object.entries(existing.countryScores).map(([key, value]) => [key, clampNumber(Math.round(Number(value)), 0, 100000000)])
+        )
         : {},
     currentStreak: clampNumber(Math.round(existing?.currentStreak ?? 0), 0, 100000),
     longestStreak: clampNumber(Math.round(existing?.longestStreak ?? 0), 0, 100000),
@@ -310,16 +310,16 @@ function toSafePlayer(id: string, name: string, existing?: Partial<StoredPlayer>
     authProvider: existing?.authProvider === 'google' ? 'google' : 'guest',
     linkedGoogle:
       existing?.linkedGoogle &&
-      typeof existing.linkedGoogle.sub === 'string' &&
-      typeof existing.linkedGoogle.email === 'string' &&
-      typeof existing.linkedGoogle.name === 'string'
+        typeof existing.linkedGoogle.sub === 'string' &&
+        typeof existing.linkedGoogle.email === 'string' &&
+        typeof existing.linkedGoogle.name === 'string'
         ? {
-            sub: existing.linkedGoogle.sub,
-            email: existing.linkedGoogle.email,
-            name: existing.linkedGoogle.name,
-            picture: typeof existing.linkedGoogle.picture === 'string' ? existing.linkedGoogle.picture : undefined,
-            linkedAt: typeof existing.linkedGoogle.linkedAt === 'string' ? existing.linkedGoogle.linkedAt : new Date().toISOString(),
-          }
+          sub: existing.linkedGoogle.sub,
+          email: existing.linkedGoogle.email,
+          name: existing.linkedGoogle.name,
+          picture: typeof existing.linkedGoogle.picture === 'string' ? existing.linkedGoogle.picture : undefined,
+          linkedAt: typeof existing.linkedGoogle.linkedAt === 'string' ? existing.linkedGoogle.linkedAt : new Date().toISOString(),
+        }
         : undefined,
     lastLoginDate:
       typeof (existing as { lastLoginDate?: unknown })?.lastLoginDate === 'string'
@@ -355,7 +355,7 @@ function normalizeStore(raw: unknown): LeaderboardStore {
           Math.round(
             Number(
               (r as { finalScore?: number }).finalScore ??
-                Number(r.score ?? 0) + Number((r as { bonusScore?: number }).bonusScore ?? 0)
+              Number(r.score ?? 0) + Number((r as { bonusScore?: number }).bonusScore ?? 0)
             )
           ),
           0,
@@ -459,16 +459,16 @@ function buildLeaderboard(
       continue;
     }
     const isBetter =
-      run.score > existing.score ||
-      (run.score === existing.score && run.accuracy > existing.accuracy) ||
-      (run.score === existing.score && run.accuracy === existing.accuracy && run.playedAt > existing.playedAt);
+      run.finalScore > existing.finalScore ||
+      (run.finalScore === existing.finalScore && run.accuracy > existing.accuracy) ||
+      (run.finalScore === existing.finalScore && run.accuracy === existing.accuracy && run.playedAt > existing.playedAt);
     if (isBetter) {
       bestByPlayer.set(run.playerId, run);
     }
   }
 
   const sorted = [...bestByPlayer.values()].sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
+    if (b.finalScore !== a.finalScore) return b.finalScore - a.finalScore;
     if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
     return a.playedAt.localeCompare(b.playedAt);
   });

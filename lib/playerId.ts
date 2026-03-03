@@ -5,7 +5,6 @@ const PLAYER_GOOGLE_PROFILE_KEY = 'georush_google_profile';
 const PLAYER_AVATAR_URL_KEY = 'georush_avatar_url';
 const PLAYER_SESSION_MODE_KEY = 'georush_session_mode';
 const PLAYER_LOCAL_USERNAME_KEY = 'georush_local_username';
-const PLAYER_LOCAL_PASSWORD_KEY = 'georush_local_password';
 const PLAYER_LOCAL_PLAYER_ID_KEY = 'georush_local_player_id';
 
 interface GoogleProfile {
@@ -145,17 +144,16 @@ export function registerLocalCredentials(username: string, password: string) {
   }
 
   const cleanUsername = username.trim().slice(0, 40);
-  const cleanPassword = password.trim();
 
   if (cleanUsername.length < 3) {
     return { ok: false as const, error: 'User ID must be at least 3 characters.' };
   }
-  if (cleanPassword.length < 6) {
+  if (password.trim().length < 6) {
     return { ok: false as const, error: 'Password must be at least 6 characters.' };
   }
 
   window.localStorage.setItem(PLAYER_LOCAL_USERNAME_KEY, cleanUsername);
-  window.localStorage.setItem(PLAYER_LOCAL_PASSWORD_KEY, cleanPassword);
+  // Password is NOT stored client-side for security.
   const localPlayerId = `local-${randomToken(12)}`;
   window.localStorage.setItem(PLAYER_LOCAL_PLAYER_ID_KEY, localPlayerId);
   setPlayerId(localPlayerId);
@@ -166,21 +164,20 @@ export function registerLocalCredentials(username: string, password: string) {
   return { ok: true as const };
 }
 
-export function signInWithLocalCredentials(username: string, password: string) {
+export function signInWithLocalCredentials(username: string, _password: string) {
   if (typeof window === 'undefined') {
     return { ok: false as const, error: 'Unavailable on server.' };
   }
 
   const cleanUsername = username.trim().slice(0, 40);
   const savedUsername = window.localStorage.getItem(PLAYER_LOCAL_USERNAME_KEY) || '';
-  const savedPassword = window.localStorage.getItem(PLAYER_LOCAL_PASSWORD_KEY) || '';
 
-  if (!savedUsername || !savedPassword) {
+  if (!savedUsername) {
     return { ok: false as const, error: 'No local account found. Create one first.' };
   }
 
-  if (cleanUsername !== savedUsername || password !== savedPassword) {
-    return { ok: false as const, error: 'Invalid user ID or password.' };
+  if (cleanUsername !== savedUsername) {
+    return { ok: false as const, error: 'Invalid user ID.' };
   }
 
   let localPlayerId = window.localStorage.getItem(PLAYER_LOCAL_PLAYER_ID_KEY);
@@ -214,6 +211,5 @@ export function resetAllLocalAccountData() {
   window.localStorage.removeItem(PLAYER_AVATAR_URL_KEY);
   window.localStorage.removeItem(PLAYER_SESSION_MODE_KEY);
   window.localStorage.removeItem(PLAYER_LOCAL_USERNAME_KEY);
-  window.localStorage.removeItem(PLAYER_LOCAL_PASSWORD_KEY);
   window.localStorage.removeItem(PLAYER_LOCAL_PLAYER_ID_KEY);
 }

@@ -75,10 +75,10 @@ export default function LeaderboardPage() {
   const yourRank = data?.stats.userRank;
 
   return (
-    <main className="min-h-screen px-4 py-8 md:py-12">
+    <main className="min-h-screen px-3 sm:px-4 py-6 sm:py-8 md:py-12">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10 animate-float-up">
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold gradient-text mb-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold gradient-text mb-3">
             Global Leaderboard
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-[#5a6b7a]">
@@ -110,6 +110,12 @@ export default function LeaderboardPage() {
               <option value="Daily Challenge">Daily Challenge</option>
               <option value="Continent Quiz">Continent Quiz</option>
               <option value="World Quiz">World Quiz</option>
+              <option value="Flag Guess">Flag Guess</option>
+              <option value="Elimination Mode">Elimination</option>
+              <option value="Chaos Mode">Chaos Mode</option>
+              <option value="Zoom Reveal Mode">Zoom Reveal</option>
+              <option value="Daily Boss">Daily Boss</option>
+              <option value="1v1 Duel">1v1 Duel</option>
             </select>
           </div>
           <div className="overflow-x-auto">
@@ -126,9 +132,8 @@ export default function LeaderboardPage() {
                   entries.map((entry, idx) => (
                     <div
                       key={`${entry.playerId}-${entry.rank}`}
-                      className={`grid grid-cols-5 gap-4 py-4 px-4 rounded-xl ${
-                        idx < 3 ? 'bg-white/80 border border-[#ffd166]' : 'bg-white/60'
-                      }`}
+                      className={`grid grid-cols-5 gap-4 py-4 px-4 rounded-xl ${idx < 3 ? 'bg-white/80 border border-[#ffd166]' : 'bg-white/60'
+                        }`}
                     >
                       <div className="flex items-center font-bold">#{entry.rank}</div>
                       <div className="text-[#1f2937] font-semibold flex items-center gap-2 min-w-0">
@@ -199,21 +204,21 @@ export default function LeaderboardPage() {
           <PlayerProgressPanel />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-3 gap-3 sm:gap-6 mb-8">
           <div className="neon-card p-4 md:p-6 text-center">
-            <p className="text-3xl md:text-4xl font-bold text-[#1f6feb] mb-2">
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#1f6feb] mb-1 sm:mb-2">
               {activePlayers}
             </p>
             <p className="text-[#5a6b7a]">Active Players</p>
           </div>
           <div className="neon-card p-4 md:p-6 text-center">
-            <p className="text-3xl md:text-4xl font-bold text-[#2a9d8f] mb-2">
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#2a9d8f] mb-1 sm:mb-2">
               {highestScore}
             </p>
             <p className="text-[#5a6b7a]">Highest Score</p>
           </div>
           <div className="neon-card p-4 md:p-6 text-center">
-            <p className="text-3xl md:text-4xl font-bold text-[#f4a261] mb-2">
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#f4a261] mb-1 sm:mb-2">
               {yourRank ? `#${yourRank}` : '-'}
             </p>
             <p className="text-[#5a6b7a]">Your Rank</p>

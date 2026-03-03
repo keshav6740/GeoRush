@@ -150,7 +150,7 @@ const MODE_ITEMS = [
 
 export default function ModesPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden px-4 py-12">
+    <main className="relative min-h-screen overflow-hidden px-3 sm:px-4 py-8 sm:py-12">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#9fd8ff]/30 blur-3xl" />
         <div className="absolute top-1/4 -right-20 h-80 w-80 rounded-full bg-[#b9f0d2]/30 blur-3xl" />
@@ -158,14 +158,14 @@ export default function ModesPage() {
       </div>
 
       <div className="relative max-w-7xl mx-auto">
-        <section className="mb-10 rounded-[2rem] border border-white/70 bg-white/65 p-8 md:p-10 backdrop-blur-sm">
+        <section className="mb-8 sm:mb-10 rounded-[1.25rem] sm:rounded-[2rem] border border-white/70 bg-white/65 p-5 sm:p-8 md:p-10 backdrop-blur-sm">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="max-w-3xl">
               <p className="inline-flex items-center gap-2 rounded-full border border-[#d3dfec] bg-white/80 px-4 py-1.5 text-xs tracking-[0.2em] uppercase text-[#607386] mb-4">
                 <Clock3 size={14} />
                 Select Your Mode
               </p>
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-[0.9] bg-gradient-to-r from-[#0f5bd8] via-[#17a06f] to-[#f18a3d] bg-clip-text text-transparent">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black leading-[0.9] bg-gradient-to-r from-[#0f5bd8] via-[#17a06f] to-[#f18a3d] bg-clip-text text-transparent">
                 Pick Your Route
               </h1>
               <p className="text-lg text-[#516375] mt-4">
@@ -178,15 +178,15 @@ export default function ModesPage() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {MODE_ITEMS.map((mode, idx) => {
             const Icon = mode.icon;
             return (
               <Link key={mode.href} href={mode.href} className="group block">
                 <article
-                  className={`h-full rounded-[1.5rem] border border-white/70 bg-white/80 backdrop-blur-sm p-6 transition-all duration-300 hover:-translate-y-1.5 hover:rotate-[-0.4deg] ${mode.glow}`}
+                  className={`h-full rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/70 bg-white/80 backdrop-blur-sm p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1.5 hover:rotate-[-0.4deg] ${mode.glow}`}
                 >
-                  <div className="flex items-start justify-between gap-4 mb-6">
+                  <div className="flex items-start justify-between gap-3 mb-4 sm:mb-6">
                     <div
                       className="h-12 w-12 rounded-xl grid place-items-center"
                       style={{
@@ -202,7 +202,7 @@ export default function ModesPage() {
                     </span>
                   </div>
 
-                  <h2 className="text-2xl font-black text-[#1f2937] leading-tight">{mode.title}</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-[#1f2937] leading-tight">{mode.title}</h2>
                   <p className="text-sm font-semibold mt-1" style={{ color: mode.accent }}>
                     {mode.subtitle}
                   </p>
@@ -218,8 +218,8 @@ export default function ModesPage() {
           })}
         </section>
 
-        <section className="mt-10 rounded-[1.5rem] border border-white/70 bg-white/75 p-6 md:p-7 backdrop-blur-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <section className="mt-8 sm:mt-10 rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/70 bg-white/75 p-4 sm:p-6 md:p-7 backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="h-10 w-10 rounded-lg bg-[#1f6feb1f] text-[#1f6feb] border border-[#1f6feb66] grid place-items-center">
                 <Globe2 size={18} />
@@ -229,7 +229,7 @@ export default function ModesPage() {
                 <p className="text-[#5a6b7a]">Try Speed Run first, then jump into Daily Challenge for leaderboard progression.</p>
               </div>
             </div>
-            <Link href="/game/speed-run" className="neon-btn-primary px-6 py-3 whitespace-nowrap">
+            <Link href="/game/speed-run" className="neon-btn-primary px-6 py-3 whitespace-nowrap w-full sm:w-auto text-center">
               Start Speed Run
             </Link>
           </div>

@@ -154,6 +154,28 @@
     .neon-card {
       @apply rounded-xl;
     }
+
+    .stat-card {
+      @apply p-3;
+    }
+
+    .stat-value {
+      @apply text-lg;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .stat-card {
+      @apply p-2;
+    }
+
+    .stat-value {
+      @apply text-base;
+    }
+
+    .neon-btn {
+      @apply px-3 py-2 text-xs;
+    }
   }
 }
 

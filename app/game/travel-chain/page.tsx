@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { getAutocomplete } from '@/lib/countries';
+import { ResultsCard } from '@/components/results/ResultsCard';
 import { WorldGuessMap } from '@/components/results/WorldGuessMap';
 import {
   getDailyTravelChallenge,
@@ -166,10 +167,10 @@ export default function TravelChainPage() {
 
   if (chain.length === 0 || !startedAt) {
     return (
-      <main className="min-h-screen px-4 py-10">
+      <main className="min-h-screen px-3 sm:px-4 py-6 sm:py-10">
         <div className="max-w-3xl mx-auto">
           <div className="neon-card p-8 space-y-6 text-center">
-            <h1 className="text-4xl font-bold gradient-text">Travel Chain</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold gradient-text">Travel Chain</h1>
             <p className="text-[#5a6b7a]">
               Travel from one country to another by entering countries that eventually connect the route in as few steps as possible.
             </p>
@@ -181,9 +182,9 @@ export default function TravelChainPage() {
                 Start Practice Chain
               </button>
             </div>
-            <a href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
+            <Link href="/modes" className="text-[#5a6b7a] hover:text-[#1f6feb] transition-colors text-sm">
               Back to Modes
-            </a>
+            </Link>
           </div>
         </div>
       </main>
@@ -193,11 +194,11 @@ export default function TravelChainPage() {
   if (isFinished && solved) {
     const optimal = Math.max(1, challenge.minSteps);
     return (
-      <main className="min-h-screen px-4 py-8">
+      <main className="min-h-screen px-3 sm:px-4 py-6 sm:py-8">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="rounded-2xl border border-[#d8e0eb] bg-white p-6 md:p-8">
             <p className="text-sm uppercase tracking-[0.2em] text-[#6a7c90] mb-2">Route Completed</p>
-            <h1 className="text-3xl md:text-4xl font-bold text-[#1f2937] mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1f2937] mb-2">
               {isOptimal ? 'Perfect Route' : 'Route Completed'}
             </h1>
             <p className="text-[#4d6073] text-base md:text-lg">
@@ -232,6 +233,14 @@ export default function TravelChainPage() {
                 <p className="text-[#1f2937] text-sm">Guesses entered: {guessesUsed}</p>
                 <p className="text-[#1f2937] text-sm">Optimal steps: {optimal}</p>
               </div>
+              <ResultsCard
+                gameMode={mode === 'daily' ? 'Travel Chain Daily' : 'Travel Chain Practice'}
+                score={Math.max(0, (optimal * 50) - ((edgesUsed - optimal) * 10))}
+                correct={edgesUsed <= optimal ? optimal : edgesUsed}
+                total={optimal}
+                timeSpentSeconds={timeSpentSeconds}
+                countriesGuessed={completedPath ?? chain}
+              />
               <div className="rounded-xl border border-[#e4ebf5] bg-[#f7fbff] p-3">
                 <p className="text-xs uppercase tracking-[0.16em] text-[#6a7c90] mb-2">Connected Path</p>
                 <div className="flex flex-wrap gap-2">
@@ -270,9 +279,9 @@ export default function TravelChainPage() {
             <button onClick={() => startChallenge(mode, true)} className="neon-btn px-6 py-3">
               Try Again
             </button>
-            <a href="/modes" className="neon-btn px-6 py-3 inline-block">
+            <Link href="/modes" className="neon-btn px-6 py-3 inline-block">
               Back to Modes
-            </a>
+            </Link>
           </div>
         </div>
       </main>
@@ -286,24 +295,22 @@ export default function TravelChainPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm uppercase tracking-[0.22em] text-[#6a7c90]">Travel Chain</p>
-              <h1 className="text-2xl md:text-3xl font-bold text-[#1f2937]">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#1f2937]">
                 {mode === 'daily' ? "Today's route" : 'Practice route'}
               </h1>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => startChallenge('daily')}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold ${
-                  mode === 'daily' ? 'bg-[#1f6feb] text-white' : 'bg-[#f7fbff] border border-[#d8e0eb] text-[#1f2937]'
-                }`}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold ${mode === 'daily' ? 'bg-[#1f6feb] text-white' : 'bg-[#f7fbff] border border-[#d8e0eb] text-[#1f2937]'
+                  }`}
               >
                 Daily Challenge
               </button>
               <button
                 onClick={() => startChallenge('practice', true)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold ${
-                  mode === 'practice' ? 'bg-[#1f6feb] text-white' : 'bg-[#f7fbff] border border-[#d8e0eb] text-[#1f2937]'
-                }`}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold ${mode === 'practice' ? 'bg-[#1f6feb] text-white' : 'bg-[#f7fbff] border border-[#d8e0eb] text-[#1f2937]'
+                  }`}
               >
                 Practice
               </button>
@@ -401,9 +408,9 @@ export default function TravelChainPage() {
               <button onClick={() => startChallenge(mode, true)} className="neon-btn w-full py-2.5">
                 Reset Route
               </button>
-              <a href="/modes" className="neon-btn w-full py-2.5 text-center inline-block">
+              <Link href="/modes" className="neon-btn w-full py-2.5 text-center inline-block">
                 Back
-              </a>
+              </Link>
             </div>
           </div>
         </div>

@@ -2,31 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { getOrCreatePlayerIdentity, setGoogleLinkedProfile } from '@/lib/playerId';
+import type { PlayerProfile } from '@/lib/types';
+import { heatColor, lastNDaysIso } from '@/lib/profileUtils';
 
-interface PlayerProfile {
-  id: string;
-  name: string;
-  avatarUrl?: string;
-  authProvider: 'guest' | 'google';
-  linkedGoogle?: {
-    sub: string;
-    email: string;
-    name: string;
-    picture?: string;
-    linkedAt: string;
-  };
-  gamesPlayed: number;
-  bestScore: number;
-  lifetimeScore: number;
-  worldQuizScore: number;
-  modeScores: Record<string, number>;
-  countryScores: Record<string, number>;
-  currentStreak: number;
-  longestStreak: number;
-  lastActiveDate: string | null;
-  activityHeatmap: Record<string, number>;
-  badges: string[];
-}
+
 
 declare global {
   interface Window {
@@ -44,30 +23,7 @@ declare global {
   }
 }
 
-function heatColor(value: number) {
-  if (value <= 0) return 'bg-[#eef2f7]';
-  if (value === 1) return 'bg-[#b8f2d2]';
-  if (value <= 3) return 'bg-[#72e2ad]';
-  if (value <= 6) return 'bg-[#2fbb86]';
-  return 'bg-[#13855e]';
-}
 
-function humanBadge(badge: string) {
-  return badge
-    .replaceAll('_', ' ')
-    .replaceAll(/\b\w/g, (m) => m.toUpperCase());
-}
-
-function lastNDaysIso(days: number) {
-  const out: string[] = [];
-  const now = new Date();
-  for (let i = days - 1; i >= 0; i -= 1) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    out.push(d.toISOString().slice(0, 10));
-  }
-  return out;
-}
 
 export function PlayerProgressPanel() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
@@ -102,6 +58,8 @@ export function PlayerProgressPanel() {
 
   useEffect(() => {
     if (!googleClientId) return;
+    // Prevent duplicate script tags (Issue #26)
+    if (document.querySelector('script[src*="accounts.google.com/gsi/client"]')) return;
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -210,8 +168,8 @@ export function PlayerProgressPanel() {
             </div>
           )}
           <div>
-          <h3 className="text-xl font-bold text-[#1f2937]">Player Progress</h3>
-          <p className="text-sm text-[#5a6b7a]">Guest-first profile with optional Google linking.</p>
+            <h3 className="text-xl font-bold text-[#1f2937]">Player Progress</h3>
+            <p className="text-sm text-[#5a6b7a]">Guest-first profile with optional Google linking.</p>
           </div>
         </div>
         <button onClick={handleCopyShare} className="neon-btn px-4 py-2 text-sm">
@@ -257,7 +215,7 @@ export function PlayerProgressPanel() {
           <div className="flex flex-wrap gap-2">
             {profile.badges.map((badge) => (
               <span key={badge} className="pill !py-1 !px-3 text-xs">
-                {humanBadge(badge)}
+                {badge.replaceAll('_', ' ').replace(/\b\w/g, (m) => m.toUpperCase())}
               </span>
             ))}
           </div>
