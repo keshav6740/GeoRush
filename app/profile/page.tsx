@@ -20,6 +20,7 @@ import { heatColor, lastNDaysIso, toLabel } from '@/lib/profileUtils';
 export default function ProfilePage() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const [editingName, setEditingName] = useState('');
@@ -37,26 +38,55 @@ export default function ProfilePage() {
   }, [profile]);
   const maxModeScore = modeScores.length > 0 ? modeScores[0][1] : 1;
 
-  useEffect(() => {
+  const loadProfile = async () => {
+    const session = getAuthSession();
+    setSessionMode(session.mode);
+    if (!session.isAuthenticated) {
+      window.location.href = '/signin?next=/profile';
+      return;
+    }
+
     const { playerId, playerName } = getOrCreatePlayerIdentity();
-    void fetch('/api/profile', {
+    const createResponse = await fetch('/api/profile', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ playerId, playerName }),
-    })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return (await response.json()) as { profile: PlayerProfile };
-      })
-      .then((payload) => {
-        if (!payload?.profile) return;
+    });
+    if (createResponse.ok) {
+      const payload = (await createResponse.json()) as { profile?: PlayerProfile };
+      if (payload.profile) {
         setProfile(payload.profile);
         setEditingName(payload.profile.name);
-        setSessionMode(getAuthSession().mode);
-      })
-      .finally(() => setLoading(false));
+        setLoadError(null);
+        return;
+      }
+    }
+
+    const readResponse = await fetch(`/api/profile?playerId=${encodeURIComponent(playerId)}`);
+    if (readResponse.ok) {
+      const payload = (await readResponse.json()) as { profile?: PlayerProfile | null };
+      if (payload.profile) {
+        setProfile(payload.profile);
+        setEditingName(payload.profile.name);
+        setLoadError(null);
+        return;
+      }
+    }
+
+    setProfile(null);
+    setLoadError('Unable to load your profile right now.');
+  };
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await loadProfile();
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const uploadAvatarFile = async (file: File) => {
@@ -189,7 +219,22 @@ export default function ProfilePage() {
   }
 
   if (!profile) {
-    return <main className="min-h-screen px-4 py-12">Profile unavailable.</main>;
+    return (
+      <main className="min-h-screen px-4 py-12">
+        <div className="max-w-xl mx-auto rounded-2xl border border-[#d8e0eb] bg-white p-6 shadow-sm space-y-3">
+          <h1 className="text-xl font-bold text-[#1f2937]">Profile unavailable</h1>
+          <p className="text-sm text-[#5a6b7a]">{loadError ?? 'Unable to load profile data.'}</p>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => window.location.reload()} className="neon-btn px-4 py-2">
+              Retry
+            </button>
+            <Link href="/signin?next=/profile" className="neon-btn-primary px-4 py-2 text-center">
+              Sign in again
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
