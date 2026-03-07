@@ -115,7 +115,8 @@ export interface PlayerProfile {
   dontBreakStreakReminder: boolean;
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_DIR = process.env.GEORUSH_DATA_DIR?.trim()
+  || (process.env.VERCEL ? path.join('/tmp', 'georush-data') : path.join(process.cwd(), 'data'));
 const DATA_FILE = path.join(DATA_DIR, 'leaderboard.json');
 const MAX_RUNS = 20000;
 const MAX_HEATMAP_DAYS = 366;

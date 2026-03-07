@@ -41,11 +41,6 @@ export default function ProfilePage() {
   const loadProfile = async () => {
     const session = getAuthSession();
     setSessionMode(session.mode);
-    if (!session.isAuthenticated) {
-      window.location.href = '/signin?next=/profile';
-      return;
-    }
-
     const { playerId, playerName } = getOrCreatePlayerIdentity();
     const createResponse = await fetch('/api/profile', {
       method: 'POST',
