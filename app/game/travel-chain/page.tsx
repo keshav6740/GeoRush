@@ -42,9 +42,7 @@ export default function TravelChainPage() {
     const nextChallenge =
       nextMode === 'daily'
         ? getDailyTravelChallenge()
-        : forceRefresh || nextMode !== mode
-          ? getRandomTravelChallenge()
-          : getRandomTravelChallenge();
+        : getRandomTravelChallenge();
 
     setMode(nextMode);
     setChallenge(nextChallenge);
@@ -87,9 +85,11 @@ export default function TravelChainPage() {
     setInput('');
     setSuggestions([]);
 
-    const path = getPathWithinCountries(challenge.start, challenge.end, [...nextChain, challenge.end]);
-    if (path) {
-      setCompletedPath(path);
+    if (resolved === challenge.end) {
+      // User typed the destination — find the path within guessed countries
+      const path = getPathWithinCountries(challenge.start, challenge.end, nextChain);
+      const finalPath = path ?? nextChain;
+      setCompletedPath(finalPath);
       setEndedAt(Date.now());
       setIsFinished(true);
       setMessage('Route connected.');
@@ -236,7 +236,7 @@ export default function TravelChainPage() {
               <ResultsCard
                 gameMode={mode === 'daily' ? 'Travel Chain Daily' : 'Travel Chain Practice'}
                 score={Math.max(0, (optimal * 50) - ((edgesUsed - optimal) * 10))}
-                correct={edgesUsed <= optimal ? optimal : edgesUsed}
+                correct={Math.min(edgesUsed, optimal)}
                 total={optimal}
                 timeSpentSeconds={timeSpentSeconds}
                 countriesGuessed={completedPath ?? chain}
@@ -334,7 +334,6 @@ export default function TravelChainPage() {
               focusCountries={[challenge.start, challenge.end]}
               startCountries={[challenge.start]}
               endCountries={[challenge.end]}
-              mapHeightClass="h-[360px] md:h-[600px]"
               title="Target Countries"
               enableZoomPan
               hideNonScopeCountries

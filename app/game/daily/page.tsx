@@ -26,6 +26,7 @@ export default function DailyChallengePage() {
   const [showCountry, setShowCountry] = useState(true);
   const [feedback, setFeedback] = useState<{ correct: boolean; capital: string; bonus: number } | null>(null);
   const [locked, setLocked] = useState(false);
+  const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const ROUNDS = 10;
   const [challengeScore, setChallengeScore] = useState<number | null>(null);
   const [challengeFrom, setChallengeFrom] = useState('');
@@ -101,6 +102,7 @@ export default function DailyChallengePage() {
     setRoundStartTime(Date.now());
     setFeedback(null);
     setLocked(false);
+    // Note: scoreSubmitted stays true — replaying won't re-submit to leaderboard
   };
 
   if (!gameStarted && roundResults.length === 0) {
@@ -148,6 +150,13 @@ export default function DailyChallengePage() {
       }
       return sum;
     }, 0);
+    const dateKey = new Date().toISOString().slice(0, 10);
+    const dailyPlayedKey = `georush_daily_played_${dateKey}`;
+    // Mark as submitted on first view of results; replays won't re-submit
+    if (!scoreSubmitted && typeof window !== 'undefined') {
+      window.localStorage.setItem(dailyPlayedKey, '1');
+      setScoreSubmitted(true);
+    }
 
     return (
       <main className="min-h-screen px-4 py-10">

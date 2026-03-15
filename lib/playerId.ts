@@ -200,6 +200,8 @@ export function signOutPlayer() {
   window.localStorage.removeItem(PLAYER_GOOGLE_PROFILE_KEY);
   window.localStorage.removeItem(PLAYER_AVATAR_URL_KEY);
   window.localStorage.removeItem(PLAYER_NAME_KEY);
+  window.localStorage.removeItem(PLAYER_LOCAL_PLAYER_ID_KEY);
+  window.localStorage.removeItem(PLAYER_LOCAL_USERNAME_KEY);
 }
 
 export function resetAllLocalAccountData() {

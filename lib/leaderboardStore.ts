@@ -1,4 +1,4 @@
-﻿import { promises as fs } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { calculateModeXp, calculateRawModeScore, calculateStreakBonus, type ModeKey, toModeKey } from '@/lib/scoring';
 
@@ -21,6 +21,7 @@ export interface LeaderboardEntry {
   name: string;
   avatarUrl?: string;
   score: number;
+  finalScore: number;
   accuracy: number;
   gameMode: string;
   modeKey: ModeKey;
@@ -483,6 +484,7 @@ function buildLeaderboard(
       name: liveName,
       avatarUrl: currentProfile?.avatarUrl,
       score: run.score,
+      finalScore: run.finalScore,
       accuracy: run.accuracy,
       gameMode: run.gameMode,
       modeKey: run.modeKey,

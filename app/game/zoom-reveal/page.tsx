@@ -18,7 +18,7 @@ function sampleCountries(count: number) {
 
 export default function ZoomRevealPage() {
   const rounds = 10;
-  const [pool] = useState(() => sampleCountries(rounds));
+  const [pool, setPool] = useState(() => sampleCountries(rounds));
   const [idx, setIdx] = useState(0);
   const [answer, setAnswer] = useState('');
   const [correct, setCorrect] = useState(0);
@@ -54,6 +54,15 @@ export default function ZoomRevealPage() {
     }
   };
 
+  const handlePlayAgain = () => {
+    setPool(sampleCountries(rounds));
+    setIdx(0);
+    setAnswer('');
+    setCorrect(0);
+    setFinished(false);
+    setFeedback(null);
+  };
+
   if (finished) {
     return (
       <main className="min-h-screen px-4 py-10">
@@ -63,7 +72,7 @@ export default function ZoomRevealPage() {
             <h2 className="text-2xl font-bold text-[#1f2937]">Session Complete</h2>
             <p className="text-[#5a6b7a]">Guess countries from zoomed map regions.</p>
             <div className="flex gap-2">
-              <Link href="/game/zoom-reveal" className="neon-btn-primary px-5 py-2.5">Play Again</Link>
+              <button onClick={handlePlayAgain} className="neon-btn-primary px-5 py-2.5">Play Again</button>
               <a href="/modes" className="neon-btn px-5 py-2.5">Back</a>
             </div>
           </div>
@@ -83,7 +92,6 @@ export default function ZoomRevealPage() {
           guessedCountries={[]}
           focusCountries={focus}
           title="Guess the highlighted region"
-          mapHeightClass="h-[360px] md:h-[560px]"
           cropToFocus
           enableZoomPan
         />

@@ -99,6 +99,17 @@ export default function ChaosModePage() {
     );
   }
 
+  const handlePlayAgain = () => {
+    setStarted(true);
+    setFinished(false);
+    setTimeLeft(60);
+    setRuleTick(10);
+    setRuleIdx(0);
+    setCorrectSet(new Set());
+    setWrong(0);
+    setInput('');
+  };
+
   if (finished) {
     const correct = correctSet.size;
     return (
@@ -110,7 +121,7 @@ export default function ChaosModePage() {
             <p className="text-[#5a6b7a]">Correct: {correct}</p>
             <p className="text-[#5a6b7a]">Wrong: {wrong}</p>
             <div className="flex gap-2">
-              <Link href="/game/chaos-mode" className="neon-btn-primary px-5 py-2.5">Play Again</Link>
+              <button onClick={handlePlayAgain} className="neon-btn-primary px-5 py-2.5">Play Again</button>
               <a href="/modes" className="neon-btn px-5 py-2.5">Back</a>
             </div>
           </div>

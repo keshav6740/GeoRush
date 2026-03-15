@@ -22,6 +22,7 @@ interface WorldGuessMapProps {
   focusPaddingRatio?: number;
   minFocusViewportRatio?: number;
   interactionResetKey?: string;
+  showLabels?: boolean;
 }
 
 interface GeoFeature {
@@ -51,6 +52,7 @@ interface TinyMarker {
   cy: number;
   guessed: boolean;
   revealed: boolean;
+  name?: string;
 }
 
 interface ManualMarkerSeed {
@@ -65,7 +67,7 @@ const GEOJSON_URL =
 const WIDTH = 1000;
 const HEIGHT = 500;
 const GUESSED_FILL_COLOR = '#b8f4b8';
-const OCEAN_FILL_COLOR = '#bfe7ff';
+const OCEAN_FILL_COLOR = '#a8d8fa';
 
 const REGION_BOUNDS: Record<
   NonNullable<WorldGuessMapProps['focusRegion']>,
@@ -75,7 +77,7 @@ const REGION_BOUNDS: Record<
   Americas: { minLon: -170, maxLon: -30, minLat: -56, maxLat: 83 },
   Asia: { minLon: 25, maxLon: 180, minLat: -12, maxLat: 82 },
   Europe: { minLon: -25, maxLon: 45, minLat: 34, maxLat: 72 },
-  Oceania: { minLon: 95, maxLon: 180, minLat: -55, maxLat: 25 },
+  Oceania: { minLon: 95, maxLon: 195, minLat: -55, maxLat: 25 },
 };
 
 const MANUAL_MICRO_MARKERS: ManualMarkerSeed[] = [
@@ -112,12 +114,26 @@ const MANUAL_MICRO_MARKERS: ManualMarkerSeed[] = [
   { key: 'micronesia', lon: 158.2, lat: 6.9 },
   { key: 'nauru', lon: 166.93, lat: -0.52 },
   { key: 'palau', lon: 134.5, lat: 7.5 },
-  { key: 'samoa', lon: -172.1, lat: -13.76 },
+  { key: 'samoa', lon: 187.9, lat: -13.76 },
   { key: 'solomon islands', lon: 160.16, lat: -9.65 },
-  { key: 'tonga', lon: -175.2, lat: -21.17 },
+  { key: 'tonga', lon: 184.8, lat: -21.17 },
   { key: 'tuvalu', lon: 179.2, lat: -8.5 },
   { key: 'vanuatu', lon: 167.95, lat: -16.25 },
 ];
+
+const LABEL_OVERRIDES: Record<string, { lon: number; lat: number }> = {
+  'united states': { lon: -98, lat: 39 },
+  'russia': { lon: 95, lat: 60 },
+  'france': { lon: 2, lat: 46 },
+  'united kingdom': { lon: -2, lat: 54 },
+  'canada': { lon: -106, lat: 56 },
+  'australia': { lon: 133, lat: -25 },
+  'indonesia': { lon: 113, lat: 0 },
+  'chile': { lon: -71, lat: -35 },
+  'norway': { lon: 15, lat: 65 },
+  'new zealand': { lon: 174, lat: -41 },
+  'fiji': { lon: 178, lat: -18 },
+};
 
 function projectPoint(lon: number, lat: number) {
   const x = ((lon + 180) / 360) * WIDTH;
@@ -256,7 +272,7 @@ export function WorldGuessMap({
   startCountries = [],
   endCountries = [],
   focusRegion,
-  mapHeightClass = 'h-[360px] md:h-[560px]',
+  mapHeightClass = '',
   title = 'Countries You Nailed',
   enableZoomPan = false,
   enableTilt3d = false,
@@ -265,6 +281,7 @@ export function WorldGuessMap({
   focusPaddingRatio = 0.08,
   minFocusViewportRatio = 0,
   interactionResetKey,
+  showLabels = false,
 }: WorldGuessMapProps) {
   const [data, setData] = useState<GeoData | null>(null);
   const [failed, setFailed] = useState(false);
@@ -345,12 +362,24 @@ export function WorldGuessMap({
 
   const countries = useMemo(() => {
     if (!data?.features) return [];
-    return data.features
+    const list = data.features
       .map((feature) => {
         const name = feature.properties?.name || '';
         const normalized = canonicalMapKey(name);
         const path = geometryToPath(feature.geometry);
         const bounds = geometryToBounds(feature.geometry);
+        let origPt: { x: number; y: number } | null = null;
+        if (LABEL_OVERRIDES[normalized]) {
+          origPt = projectPoint(LABEL_OVERRIDES[normalized].lon, LABEL_OVERRIDES[normalized].lat);
+        } else if (bounds) {
+          origPt = {
+            x: (bounds.minX + bounds.maxX) / 2,
+            y: (bounds.minY + bounds.maxY) / 2,
+          };
+        }
+
+        let labelPt = origPt ? { ...origPt } : null;
+
         const forcedEuropeInScope =
           focusRegion === 'Europe' && (normalized === 'united kingdom' || normalized === 'serbia');
         return {
@@ -358,6 +387,8 @@ export function WorldGuessMap({
           normalized,
           path,
           bounds,
+          origPt,
+          labelPt,
           inScope: focusSet.size === 0 || focusSet.has(normalized) || forcedEuropeInScope,
           isStart: startSet.has(normalized),
           isEnd: endSet.has(normalized),
@@ -366,6 +397,51 @@ export function WorldGuessMap({
         };
       })
       .filter((country) => country.path);
+
+    // Relaxation algorithm for non-overlapping labels
+    const RELAX_PASSES = 25;
+    for (let i = 0; i < RELAX_PASSES; i++) {
+       for (let j = 0; j < list.length; j++) {
+         if (!list[j].inScope || !list[j].labelPt) continue;
+         for (let k = j + 1; k < list.length; k++) {
+            if (!list[k].inScope || !list[k].labelPt) continue;
+            
+            const dx = list[j].labelPt!.x - list[k].labelPt!.x;
+            const dy = list[j].labelPt!.y - list[k].labelPt!.y;
+            const dist = Math.hypot(dx, dy);
+            
+            // Approximate required distance:
+            const minW = ((list[j].name.length + list[k].name.length) / 2) * 4.5 + 6; 
+            const minH = 12;
+            
+            if (Math.abs(dx) < minW && Math.abs(dy) < minH && dist > 0.01) {
+              const overlapX = minW - Math.abs(dx);
+              const overlapY = minH - Math.abs(dy);
+              
+              if (overlapX < overlapY) {
+                 const sign = dx > 0 ? 1 : -1;
+                 const push = (overlapX / 2) * sign * 0.8;
+                 list[j].labelPt!.x += push;
+                 list[k].labelPt!.x -= push;
+              } else {
+                 const sign = dy > 0 ? 1 : -1;
+                 const push = (overlapY / 2) * sign * 0.8;
+                 list[j].labelPt!.y += push;
+                 list[k].labelPt!.y -= push;
+              }
+            }
+         }
+       }
+       // Pull back gently to original centroid
+       for (const c of list) {
+          if (c.inScope && c.labelPt && c.origPt) {
+             c.labelPt!.x += (c.origPt.x - c.labelPt!.x) * 0.15;
+             c.labelPt!.y += (c.origPt.y - c.labelPt!.y) * 0.15;
+          }
+       }
+    }
+
+    return list;
   }, [data, endSet, focusRegion, focusSet, guessedSet, revealedSet, startSet]);
 
   const guessedCount = countries.filter((country) => country.guessed).length;
@@ -390,14 +466,29 @@ export function WorldGuessMap({
     }
 
     if (!cropToFocus || focusSet.size === 0) {
-      return { minX: 0, minY: 0, width: WIDTH, height: HEIGHT };
+      // Calculate exact bounding box of all lands to perfectly crop out excess water
+      const allBounds = countries
+        .filter((c) => c.bounds && c.normalized !== 'antarctica')
+        .map((c) => c.bounds as Bounds);
+      const mergedAll = mergeBounds(allBounds);
+      if (mergedAll) {
+        const paddedAll = paddedBounds(mergedAll, 0.015); // 1.5% padding tight crop
+        paddedAll.maxX = Math.max(paddedAll.maxX, 1030); // Prevent Samoa/Tonga clipping
+        return {
+          minX: paddedAll.minX,
+          minY: paddedAll.minY,
+          width: Math.max(10, paddedAll.maxX - paddedAll.minX),
+          height: Math.max(10, paddedAll.maxY - paddedAll.minY),
+        };
+      }
+      return { minX: 10, minY: 20, width: 980, height: 535 };
     }
     const focusBounds = countries
       .filter((country) => focusSet.has(country.normalized) && country.bounds)
       .map((country) => country.bounds as Bounds);
     const merged = mergeBounds(focusBounds);
     if (!merged) {
-      return { minX: 0, minY: 0, width: WIDTH, height: HEIGHT };
+      return { minX: 10, minY: 20, width: 980, height: 535 };
     }
     const padded = paddedBounds(merged, focusPaddingRatio);
     const currentWidth = Math.max(10, padded.maxX - padded.minX);
@@ -537,6 +628,7 @@ export function WorldGuessMap({
         cy: pt.y,
         guessed,
         revealed,
+        name: seed.key.replace(/\b\w/g, l => l.toUpperCase()),
       });
     }
     return markers;
@@ -550,7 +642,7 @@ export function WorldGuessMap({
       </div>
 
       <div
-        className="rounded-2xl overflow-hidden border border-[#d9dee5] bg-[#bfe7ff] transition-transform duration-150"
+        className="rounded-2xl overflow-hidden border border-[#d9dee5] bg-[#a8d8fa] transition-transform duration-150"
         style={
           enableTilt3d
             ? {
@@ -583,7 +675,7 @@ export function WorldGuessMap({
             ref={svgRef}
             viewBox={`${mapView.minX} ${mapView.minY} ${mapView.width} ${mapView.height}`}
             preserveAspectRatio="xMidYMid meet"
-            className={`w-full ${mapHeightClass} block bg-[#bfe7ff] ${enableZoomPan ? 'cursor-grab active:cursor-grabbing' : ''}`}
+            className={`w-full h-auto block bg-[#a8d8fa] ${mapHeightClass} ${enableZoomPan ? 'cursor-grab active:cursor-grabbing' : ''}`}
             role="img"
             aria-label="World map with guessed countries highlighted"
             onWheel={handleWheel}
@@ -593,6 +685,17 @@ export function WorldGuessMap({
             onPointerCancel={handlePointerUp}
             style={enableZoomPan ? { touchAction: 'none' } : undefined}
           >
+            <style>
+              {`
+                @keyframes mapLabelDrop {
+                  0% { transform: translate(var(--startX, 0), var(--startY, -15px)) scale(0.5); opacity: 0; }
+                  100% { transform: translate(0, 0) scale(1); opacity: 1; }
+                }
+                .animate-map-label-drop {
+                  animation: mapLabelDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                }
+              `}
+            </style>
             <g
               transform={`translate(${pan.x.toFixed(2)} ${pan.y.toFixed(2)}) translate(${(mapView.minX + mapView.width / 2).toFixed(2)} ${(mapView.minY + mapView.height / 2).toFixed(2)}) scale(${zoom.toFixed(3)}) translate(${(-(mapView.minX + mapView.width / 2)).toFixed(2)} ${(-(mapView.minY + mapView.height / 2)).toFixed(2)})`}
             >
@@ -621,16 +724,99 @@ export function WorldGuessMap({
                 />
               ))}
               {tinyMarkers.map((marker) => (
-                <circle
-                  key={`tiny-${marker.key}`}
-                  cx={marker.cx}
-                  cy={marker.cy}
-                  r={2.2}
-                  fill={marker.guessed ? GUESSED_FILL_COLOR : marker.revealed ? '#e76f51' : '#ffffff'}
-                  stroke="#334155"
-                  strokeWidth={0.6}
-                />
+                <g key={`tiny-group-${marker.key}`}>
+                  <circle
+                    cx={marker.cx}
+                    cy={marker.cy}
+                    r={2.2}
+                    fill={marker.guessed ? GUESSED_FILL_COLOR : marker.revealed ? '#e76f51' : '#ffffff'}
+                    stroke="#334155"
+                    strokeWidth={0.6}
+                  />
+                  {showLabels && (marker.guessed || marker.revealed) && (
+                    <text
+                      x={marker.cx}
+                      y={marker.cy - 6}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize="6"
+                      fontWeight="900"
+                      fill={marker.revealed ? '#991b1b' : '#064e3b'}
+                      paintOrder="stroke"
+                      stroke="#ffffff"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="animate-map-label-drop select-none drop-shadow-sm"
+                      style={
+                        {
+                          pointerEvents: 'none',
+                          '--startX': `${mapView.minX + mapView.width / 2 - marker.cx}px`,
+                          '--startY': `${mapView.minY - (marker.cy - 6)}px`,
+                        } as React.CSSProperties
+                      }
+                    >
+                      {marker.name}
+                    </text>
+                  )}
+                </g>
               ))}
+              {showLabels &&
+                countries.map((country) => {
+                  if (!country.inScope || !country.labelPt) return null;
+                  if (country.guessed || country.revealed) {
+                    return (
+                      <text
+                        key={`label-known-${country.name}`}
+                        x={country.labelPt.x}
+                        y={country.labelPt.y}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize="8.5"
+                        fontWeight="900"
+                        fill={country.revealed ? '#991b1b' : '#064e3b'}
+                        paintOrder="stroke"
+                        stroke="#ffffff"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="animate-map-label-drop select-none drop-shadow-sm"
+                        style={
+                          {
+                            pointerEvents: 'none',
+                            '--startX': `${mapView.minX + mapView.width / 2 - country.labelPt.x}px`,
+                            '--startY': `${mapView.minY - country.labelPt.y}px`,
+                          } as React.CSSProperties
+                        }
+                      >
+                        {country.name}
+                      </text>
+                    );
+                  } else if (!hideNonScopeCountries) {
+                    return (
+                      <text
+                        key={`label-unknown-${country.name}`}
+                        x={country.labelPt.x}
+                        y={country.labelPt.y}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize="4.5"
+                        fontWeight="bold"
+                        fill="#64748b"
+                        paintOrder="stroke"
+                        stroke="#ffffff"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="opacity-70 select-none"
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        ?
+                      </text>
+                    );
+                  }
+                  return null;
+                })}
             </g>
           </svg>
         )}

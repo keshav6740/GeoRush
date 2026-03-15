@@ -44,6 +44,7 @@ export function SporcleCountryQuiz({
   const [guessedCountries, setGuessedCountries] = useState<string[]>([]);
   const [revealedCountries, setRevealedCountries] = useState<string[]>([]);
   const [gaveUp, setGaveUp] = useState(false);
+  const [showLabels, setShowLabels] = useState(false);
   const [challengeScore, setChallengeScore] = useState<number | null>(null);
   const [challengeFrom, setChallengeFrom] = useState('');
 
@@ -182,8 +183,9 @@ export function SporcleCountryQuiz({
                 revealedCountries={revealedCountries}
                 focusCountries={targetList}
                 focusRegion={focusRegion}
-                mapHeightClass={mapHeightClass ?? 'h-[420px] md:h-[760px]'}
+                mapHeightClass={mapHeightClass}
                 title="Guessed Countries"
+                showLabels={true}
               />
             )}
             <ResultsCard
@@ -203,6 +205,7 @@ export function SporcleCountryQuiz({
                 focusRegion={focusRegion}
                 mapHeightClass={mapHeightClass}
                 title="Guessed Countries"
+                showLabels={true}
               />
             )}
           </div>
@@ -290,6 +293,10 @@ export function SporcleCountryQuiz({
               <button onClick={handleGiveUp} className="neon-btn px-4 py-2 text-sm whitespace-nowrap w-full sm:w-auto">
                 Give Up
               </button>
+              <label className="flex items-center gap-2 text-sm text-[#5a6b7a] cursor-pointer w-full sm:w-auto">
+                <input type="checkbox" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)} className="form-checkbox text-[#1f6feb] border-[#d8e0eb] rounded" />
+                <span className="whitespace-nowrap">Map Labels</span>
+              </label>
             </div>
           </div>
         )}
@@ -301,6 +308,7 @@ export function SporcleCountryQuiz({
             focusRegion={focusRegion}
             mapHeightClass={mapHeightClass ?? 'h-[52vh] md:h-[calc(100svh-220px)]'}
             title="Live Fill Map"
+            showLabels={showLabels}
           />
         )}
 
@@ -380,7 +388,11 @@ export function SporcleCountryQuiz({
               </div>
             )}
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-3 items-center">
+              <label className="flex items-center gap-2 text-sm text-[#5a6b7a] cursor-pointer">
+                <input type="checkbox" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)} className="form-checkbox text-[#1f6feb] border-[#d8e0eb] rounded" />
+                <span>Map Labels</span>
+              </label>
               <button onClick={handleGiveUp} className="neon-btn px-4 py-2 text-sm">
                 Give Up
               </button>
@@ -395,6 +407,7 @@ export function SporcleCountryQuiz({
             focusRegion={focusRegion}
             mapHeightClass={mapHeightClass}
             title="Live Fill Map"
+            showLabels={showLabels}
           />
         )}
       </div>

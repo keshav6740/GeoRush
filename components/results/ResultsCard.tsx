@@ -94,7 +94,9 @@ export function ResultsCard({
     if (submittedRef.current === signature) return;
     const session = getAuthSession();
     if (!session.isAuthenticated) {
-      setShowGuestSavePrompt(true);
+      if (score > 0 || correct > 0) {
+        setShowGuestSavePrompt(true);
+      }
       return;
     }
 
@@ -123,6 +125,7 @@ export function ResultsCard({
         if (!response.ok) return null;
         return (await response.json()) as {
           score: number;
+          finalScore?: number;
           xpAward?: number;
           rank: number | null;
           betterThan: number;
@@ -134,7 +137,9 @@ export function ResultsCard({
       })
       .then((payload) => {
         if (!payload) return;
-        if (typeof payload.score === 'number') {
+        if (typeof payload.finalScore === 'number') {
+          setLiveScore(payload.finalScore);
+        } else if (typeof payload.score === 'number') {
           setLiveScore(payload.score);
         }
         if (typeof payload.xpAward === 'number') {

@@ -143,7 +143,6 @@ export default function ContinentQuizPage() {
         onBack={() => setSelected(null)}
         focusRegion={selected}
         emphasizeMap
-        mapHeightClass="h-[52vh] md:h-[760px]"
         inputFirst
         showRecentGuesses={false}
       />

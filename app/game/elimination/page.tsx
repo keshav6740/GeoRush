@@ -18,7 +18,7 @@ function shuffle<T>(items: T[]) {
 export default function EliminationPage() {
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [pool] = useState(() => shuffle(COUNTRY_NAMES).slice(0, 100));
+  const [pool, setPool] = useState(() => shuffle(COUNTRY_NAMES).slice(0, 100));
   const [idx, setIdx] = useState(0);
   const [input, setInput] = useState('');
   const [correct, setCorrect] = useState(0);
@@ -60,6 +60,16 @@ export default function EliminationPage() {
     );
   }
 
+  const handlePlayAgain = () => {
+    setStarted(true);
+    setFinished(false);
+    setIdx(0);
+    setInput('');
+    setCorrect(0);
+    setStatus(null);
+    setPool(shuffle(COUNTRY_NAMES).slice(0, 100));
+  };
+
   if (finished) {
     return (
       <main className="min-h-screen px-4 py-10">
@@ -70,7 +80,7 @@ export default function EliminationPage() {
             <p className="text-[#5a6b7a]">{status ?? 'Run ended.'}</p>
             <p className="text-[#1f2937] font-semibold">Final streak: {correct}</p>
             <div className="flex gap-2">
-              <Link href="/game/elimination" className="neon-btn-primary px-5 py-2.5">Try Again</Link>
+              <button onClick={handlePlayAgain} className="neon-btn-primary px-5 py-2.5">Try Again</button>
               <a href="/modes" className="neon-btn px-5 py-2.5">Back</a>
             </div>
           </div>
@@ -92,7 +102,6 @@ export default function EliminationPage() {
             guessedCountries={[]}
             focusCountries={prompt ? [prompt] : []}
             title="Country Outline Prompt"
-            mapHeightClass="h-[320px] md:h-[520px]"
             cropToFocus
             focusPaddingRatio={0.14}
             minFocusViewportRatio={0.28}

@@ -16,6 +16,8 @@ export default function NeighbourChainPage() {
   const [resultRank, setResultRank] = useState<number | null>(null);
   const [resultBetterThan, setResultBetterThan] = useState<number | null>(null);
   const [showGuestSavePrompt, setShowGuestSavePrompt] = useState(false);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [timeSpentSeconds, setTimeSpentSeconds] = useState<number>(0);
   const {
     neighbors,
     answered,
@@ -29,9 +31,12 @@ export default function NeighbourChainPage() {
 
   useEffect(() => {
     if (gameEnded) {
+      if (startedAt) {
+        setTimeSpentSeconds(Math.max(1, Math.round((Date.now() - startedAt) / 1000)));
+      }
       setShowResults(true);
     }
-  }, [gameEnded]);
+  }, [gameEnded, startedAt]);
 
   useEffect(() => {
     if (!showResults) return;
@@ -59,6 +64,7 @@ export default function NeighbourChainPage() {
         correct: answered.length,
         total: neighbors.length,
         durationSeconds: Math.max(20, neighbors.length * 20),
+        timeSpentSeconds,
         countriesGuessed: answered,
       }),
     })
@@ -83,6 +89,8 @@ export default function NeighbourChainPage() {
 
   const handleStartGame = () => {
     setGameStarted(true);
+    setStartedAt(Date.now());
+    setTimeSpentSeconds(0);
     reset();
     setShowResults(false);
     setResultRank(null);
@@ -105,6 +113,7 @@ export default function NeighbourChainPage() {
       correct: answered.length,
       total: neighbors.length,
       durationSeconds: Math.max(20, neighbors.length * 20),
+      timeSpentSeconds,
       countriesGuessed: answered,
     });
     window.location.href = '/signin?next=/profile&saveScore=1';

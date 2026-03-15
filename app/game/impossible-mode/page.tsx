@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { SporcleCountryQuiz } from '@/components/game/SporcleCountryQuiz';
+import { COUNTRY_NAMES } from '@/lib/countries';
 import {
   getCountriesBySuffix,
   getLandlockedCountries,
@@ -53,7 +54,7 @@ const CHALLENGES: Array<{
     title: 'Impossible: No-Map World Quiz',
     subtitle: 'Classic world quiz without map assistance.',
     durationSeconds: 15 * 60,
-    countries: getLandlockedCountries().concat(getMicrostateCountries()).slice(0, 120),
+    countries: [...COUNTRY_NAMES],
     hideMap: true,
   },
 ];

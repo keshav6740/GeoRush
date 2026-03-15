@@ -11,6 +11,7 @@ interface LeaderboardEntry {
   name: string;
   avatarUrl?: string;
   score: number;
+  finalScore: number;
   accuracy: number;
   gameMode: string;
   modeKey: string;
@@ -116,6 +117,7 @@ export default function LeaderboardPage() {
               <option value="Zoom Reveal Mode">Zoom Reveal</option>
               <option value="Daily Boss">Daily Boss</option>
               <option value="1v1 Duel">1v1 Duel</option>
+              <option value="Impossible Mode">Impossible Mode</option>
             </select>
           </div>
           <div className="overflow-x-auto">
@@ -150,7 +152,7 @@ export default function LeaderboardPage() {
                         )}
                         <span className="truncate">{entry.name}</span>
                       </div>
-                      <div className="text-[#2a9d8f] font-bold">{entry.score}</div>
+                      <div className="text-[#2a9d8f] font-bold">{(entry.finalScore ?? entry.score).toLocaleString()}</div>
                       <div className="text-[#1f6feb] font-bold">{entry.accuracy}%</div>
                       <div className="text-[#f4a261] text-sm truncate">{entry.gameMode}</div>
                     </div>
